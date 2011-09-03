@@ -7,7 +7,6 @@
 *	Configuration
 **/
 #define DEFAULT_THEME
-//#define USE_HDD		  //activate to init ata bus
 //#define NO_PRINT_CONFIG         //commented to display config
 
 

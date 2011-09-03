@@ -185,10 +185,9 @@ int main(){
 	usb_init();
 	usb_do_poll();
 
-#ifdef USE_HDD
 	printf(" * sata hdd init\n");
 	xenon_ata_init();
-#endif
+
 	printf(" * sata dvd init\n");
 	xenon_atapi_init();
 
