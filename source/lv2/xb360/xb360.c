@@ -335,7 +335,8 @@ int updateXeLL(char *path)
         return -1;
     }
     
-    printf(" * Update-XeLL binary found @ %s ! Looking for XeLL binary in NAND now.\n", path);
+    printf(" * found XeLL update. press power NOW if you don't want to update.\n");
+    delay(15);
     
     for (k = 0; k < XELL_OFFSET_COUNT; k++)
     {
@@ -367,7 +368,7 @@ int updateXeLL(char *path)
       }
       
         if (memcmp(&user[offsetinblock+(XELL_FOOTER_OFFSET)],XELL_FOOTER,XELL_FOOTER_LENGTH) == 0){
-            printf(" * XeLL Binary found @ 0x%08X\n", (startblock*sfc.block_sz)+offsetinblock);
+            printf(" * XeLL Binary in NAND found @ 0x%08X\n", (startblock*sfc.block_sz)+offsetinblock);
         
          updxell = (unsigned char*)malloc(XELL_SIZE);
          if(!updxell){
@@ -383,7 +384,7 @@ int updateXeLL(char *path)
          }
 	 	 
 	 if (!memcmp(updxell, elfhdr, 4)){
-	   printf(" * really, we don't need an elf.\n");
+	   printf(" ! really, we don't need an elf.\n");
 	   return -1;
 	 }
 
