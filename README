@@ -1,0 +1,25 @@
+XeLL-Reloaded
+
+A Xenon Linux loader based on Xell by tmbinc(Felix Domke)
+
+Contributed to by
+[cOz] Cancerous1 Ced2911 GliGli Redline99 Tuxuser ... and you?
+
+XeLL-Reloaded catches CPU threads, sets them up, loads an ELF file from either network (tftp), USB(fat), or CDROM (ISO9660), and launches it. It's made to boot Linux, so it contains a flat device tree for Linux. However, it is able to load other ELF files as well, like applications based on LibXenon.
+
+* Now based on LibXenon
+* Supports the new Reset Glitch Hack. (xell-gggggg)
+* XeLL-Reloaded is now divided in 2 stages:
+	- 1st Stage initializes the Hardware, uncompresses and executes 2nd Stage
+	- 2nd Stage (based on LibXenon) loads all required drivers and does the usual "XeLL tasks"
+* Support for HDMI, and properly switches NTSC/PAL on composite.
+* All CPU Cores are active and ready to run at full speed.
+* TinyEHCI is used, delivers full USB 2.0 speed when accessing mass storage media
+* lwip network stack upgraded to v1.4 Final - It's faster and DHCP is improved.
+* It can access the DVD-drive via DMA now: faster reading
+* It's possible to reload into XeLL now when you are inside a LibXenon Application
+* New HTTP web interface to retrieve nand dump.
+* Improved hardware initialization now allows chain-loading.
+* Supports upgrading with a 2-stage XeLL-Reloaded binary from USB, named "updxell.bin"
+* Infinite boot loop when looking for ELFs to execute.(no more rushing to get the live-cd in)
+* Parses / decrypts keyvault (either with real or virtual CPUkey)
