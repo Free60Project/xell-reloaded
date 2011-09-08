@@ -1,7 +1,7 @@
 #ifndef __httpd_h
 #define __httpd_h
 
-#define MAX_LINESIZE 256
+#define MAX_LINESIZE 1024
 
 #define HTTPD_CLIENT_REQUEST 0
 #define HTTPD_CLIENT_HEADER  1
@@ -16,7 +16,7 @@
 
 #define HTTPD_ERR_KV_READ     0x10
 
-#define SENDBUFFER_LEN 4096
+#define SENDBUFFER_LEN 40960
 
 struct http_state;
 
