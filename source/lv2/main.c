@@ -41,13 +41,13 @@ void do_asciiart()
 
 void wait_and_cleanup_line()
 {
-	int i;
-	char sp[80];
-
-	for(i=0;i<sizeof(sp)-1;++i)
-		sp[i]=' ';
+	unsigned int w=0;
+	console_get_dimensions(&w,NULL);
 	
-	sp[sizeof(sp)-1]='\0';
+	char sp[w];
+
+	memset(sp,' ',w);
+	sp[w-1]='\0';
 
 	uint64_t t=mftb();
 	while(tb_diff_msec(mftb(),t)<200){ // yield to network
