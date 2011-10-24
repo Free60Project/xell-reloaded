@@ -357,13 +357,14 @@ int updateXeLL(char *path)
         return -1;
       }
       j = 0;
+      unsigned char pagebuf[MAX_PAGE_SZ];	
 
       for (i = (startblock*sfc.pages_in_block); i< (startblock+blockcnt)*sfc.pages_in_block; i++)
       {
-         sfcx_read_page(sfcx_page, (i*sfc.page_sz), 1);
+         sfcx_read_page(pagebuf, (i*sfc.page_sz), 1);
 	 //Split rawpage into user & spare
-	 memcpy(&user[j*sfc.page_sz],&sfcx_page[0x0],sfc.page_sz);
-	 memcpy(&spare[j*sfc.meta_sz],&sfcx_page[sfc.page_sz],sfc.meta_sz);
+	 memcpy(&user[j*sfc.page_sz],pagebuf,sfc.page_sz);
+	 memcpy(&spare[j*sfc.meta_sz],&pagebuf[sfc.page_sz],sfc.meta_sz);
 	 j++;
       }
       
@@ -403,15 +404,15 @@ int updateXeLL(char *path)
 		sfcx_erase_block(i*sfc.page_sz);
 
 	     /* Copy user & spare data together in a single rawpage */
-             memcpy(&sfcx_page[0x0],&user[j*sfc.page_sz],sfc.page_sz);
-	     memcpy(&sfcx_page[sfc.page_sz],&spare[j*sfc.meta_sz],sfc.meta_sz);
+             memcpy(pagebuf,&user[j*sfc.page_sz],sfc.page_sz);
+	     memcpy(&pagebuf[sfc.page_sz],&spare[j*sfc.meta_sz],sfc.meta_sz);
 	     j++;
 
-	     if (!(sfcx_is_pageempty(sfcx_page))) // We dont need to write to erased pages
+	     if (!(sfcx_is_pageempty(pagebuf))) // We dont need to write to erased pages
 	     {
-             memset(&sfcx_page[sfc.page_sz+0x0C],0x0, 4); //zero only EDC bytes
-             sfcx_calcecc((unsigned int *)sfcx_page); 	  //recalc EDC bytes
-             sfcx_write_page(sfcx_page, i*sfc.page_sz);
+             memset(&pagebuf[sfc.page_sz+0x0C],0x0, 4); //zero only EDC bytes
+             sfcx_calcecc((unsigned int *)pagebuf); 	  //recalc EDC bytes
+             sfcx_write_page(pagebuf, i*sfc.page_sz);
 	     }
          }
          printf(" * XeLL flashed! Reboot the xbox to enjoy the new build\n");

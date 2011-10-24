@@ -75,8 +75,9 @@
 #define XELL_FOOTER_LENGTH 16
 #define XELL_FOOTER "xxxxxxxxxxxxxxxx"
 
-#define XELL_OFFSET_COUNT         2
-static const unsigned int xelloffsets[XELL_OFFSET_COUNT] = {0x95060, // FreeBOOT Single-NAND main xell-2f
+#define XELL_OFFSET_COUNT         3
+static const unsigned int xelloffsets[XELL_OFFSET_COUNT] = {0x70000, // ggBoot main xell-gggggg
+							    0x95060, // FreeBOOT Single-NAND main xell-2f
                                                             0x100000}; // XeLL-Only Image
 
 typedef struct kventry {
