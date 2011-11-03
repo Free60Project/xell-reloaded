@@ -190,6 +190,48 @@ void place_jump(void *addr, void *_target)
 	flush_code(addr, 0x80);
 }
 
+void init_soc(void)
+{
+	void *soc_29 = (void*)0x8000020000030000;
+	void *soc_31 = (void*)0x8000020000040000;
+	void *soc_30 = (void*)0x8000020000060000;
+	void *soc_03 = (void*)0x8000020000048000;
+
+	u64 v;
+
+	v=ld(soc_31+0x3000);
+	v&=(((u64)-0x1a)<<42)|(((u64)-0x1a)>>22);
+	v|=(u64)3<<43;
+	std(soc_31+0x3000,v);
+
+	std(soc_31+0x3110,(((u64)-2)<<46)|(((u64)-2)>>18));
+
+	std(soc_29+0x3110,(((u64)-2)<<41)|(((u64)-2)>>23));
+
+	v=ld(soc_30+0x700);
+	v|=(u64)7<<53;
+	std(soc_30+0x700,v);
+
+	v=ld(soc_30+0x840);
+	v&=(((u64)-2)<<46)|(((u64)-2)>>18);
+	v|=(u64)0xf<<42;
+	std(soc_30+0x840,v);
+
+	v=ld(soc_31);
+	v&=((u64)0xffffffffFFFC7FC0<<46)|((u64)0xffffffffFFFC7FC0>>18);
+	v|=(u64)0x4009<<48;
+	std(soc_31,v);
+
+	v=ld(soc_03);
+	v&=(((u64)-0x30)<<57)|(((u64)-0x30)>>7);
+	v|=(u64)0x401<<46;
+	std(soc_03,v);
+
+	v=ld(soc_29);
+	v|=(u64)1<<62;
+	std(soc_29,v);
+}
+
 void fix_hrmor();
 
 int start_from_exploit=0;
@@ -267,6 +309,8 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 	}
 	else
 	{
+		init_soc();
+
 		printf(" * Attempting to wakeup all CPUs...\n");
 
 		// place startup code
@@ -311,7 +355,12 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 		// enable IRQ controllers
 
 		int i;
-		for(i=0;i<6;i++) std(irq_cntrl + i*0x1000, 1<<i); 
+		for(i=0;i<6;i++){
+			std(irq_cntrl + i*0x1000 + 0x70, 0x7c);
+			std(irq_cntrl + i*0x1000 + 8, 0x7c);
+			std(irq_cntrl + i*0x1000, 1<<i); 
+		}
+ 
 	}
 
 	printf("CPUs online: %02x..\n", get_online_processors());

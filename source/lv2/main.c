@@ -14,13 +14,17 @@
 #include <xenon_nand/xenon_sfcx.h>
 #include <xenon_nand/xenon_config.h>
 #include <xenon_soc/xenon_secotp.h>
+#include <xenon_soc/xenon_io.h>
+#include <xenon_sound/sound.h>
 #include <xenon_smc/xenon_smc.h>
+#include <xenon_smc/xenon_gpio.h>
 #include <xb360/xb360.h>
 #include <network/network.h>
 #include <httpd/httpd.h>
 #include <diskio/ata.h>
 #include <elf/elf.h>
 #include <version.h>
+#include <byteswap.h>
 
 #include "asciiart.h"
 #include "config.h"
@@ -141,8 +145,42 @@ int try_load_elf(char *filename)
 
 char FUSES[350]; /* this string stores the ascii dump of the fuses */
 
+unsigned char stacks[6][0x10000];
+
+void reset_timebase_task()
+{
+	mtspr(284,0); // TBLW
+	mtspr(285,0); // TBUW
+	mtspr(284,0);
+}
+
+void synchronize_timebases()
+{
+	xenon_thread_startup();
+	
+	std(0x200611a0,0); // stop timebase
+	
+	int i;
+	for(i=1;i<6;++i){
+		xenon_run_thread_task(i,&stacks[i][0xff00],(void *)reset_timebase_task);
+		while(xenon_is_thread_task_running(i));
+	}
+	
+	reset_timebase_task(); // don't forget thread 0
+			
+	std(0x200611a0,0x1ff); // restart timebase
+}
+	
 int main(){
 	int i;
+
+	// linux needs this
+	synchronize_timebases();
+	
+	// irqs preinit (SMC related)
+	*(volatile uint32_t*)0xea00106c = 0x1000000;
+	*(volatile uint32_t*)0xea001064 = 0x10;
+	*(volatile uint32_t*)0xea00105c = 0xc000000;
 
 	xenon_smc_start_bootanim();
 	xenon_smc_set_power_led(0, 0, 1);
@@ -164,6 +202,8 @@ int main(){
 
 	//delay(3); //give the user a chance to see our splash screen <- network init should last long enough...
 	
+	xenon_sound_init();
+
 	printf(" * nand init\n");
 	sfcx_init();
 	if (sfc.initialized != SFCX_INITIALIZED)
@@ -238,3 +278,4 @@ int main(){
 
 	return 0;
 }
+

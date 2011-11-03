@@ -14,7 +14,7 @@ b	.
 
 .globl start_from_rom
 start_from_rom:
-	or	%r2, %r2, %r2 // normal priority
+	bl	init_regs
 
 		// disable interrupts (but enable vector available, gcc likes to use VMX
 		// for memset)
@@ -126,6 +126,43 @@ other_threads_waiter:
 
 .globl other_threads_startup
 other_threads_startup:
+	mfspr	%r3, pir
+	andi.   %r3,%r3,1
+	cmplwi  %r3,1
+	beq	1f
+
+	bl	init_regs
+	
+	li	%r3,0
+	mtspr	hrmor,%r3
+	sync
+	isync
+
+	lis	%r3,0xC0
+	mtspr	ctrlwr,%r3
+	sync
+	isync
+
+1:
+	li	%r4,0x30
+	mfmsr	%r3
+	andc	%r3,%r3,%r4
+	mtsrr1	%r3
+
+	lis	%r3, start_from_rom@h
+	ori	%r3, %r3, start_from_rom@l
+
+	mtsrr0	%r3
+	rfid
+
+init_regs:
+	or	%r2, %r2, %r2 // normal priority
+
+	li	%r3, 0
+	mtspr	hid0, %r3
+	sync
+	isync
+
 	li	%r3, 0x3f00
 	rldicr	%r3, %r3, 32,31
 	mtspr	hid4, %r3
@@ -139,28 +176,25 @@ other_threads_startup:
 	sync
 	isync
 
+	lis	%r3, 1
+	ori	%r3,%r3, 0x8038
+	rldicr	%r3, %r3, 32,31
+	mtspr	hid6, %r3
+	sync
+	isync
+
 	lis	%r3, 0x1d
 	mtspr	tscr, %r3
+	sync
+	isync
 
 	li	%r3, 0x1000
 	mtspr	ttr, %r3
+	sync
+	isync
 
-	li	%r3,0
-	mtspr	hrmor,%r3
+	blr
 
-	lis	%r3,0xC0
-	mtspr	ctrlwr,%r3
-
-	li	%r4,0x30
-	mfmsr	%r3
-	andc	%r3,%r3,%r4
-	mtsrr1	%r3
-
-	lis	%r3, start_from_rom@h
-	ori	%r3, %r3, start_from_rom@l
-
-	mtsrr0	%r3
-	rfid
 .globl other_threads_startup_end
 other_threads_startup_end:
 

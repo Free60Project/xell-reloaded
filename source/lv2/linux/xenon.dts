@@ -35,7 +35,7 @@
 	};
 
 	cpus {
-		#cpus = <6>;
+		#cpus = <1>;
 		#address-cells = <1>;
 		#size-cells = <0>;
 
@@ -43,8 +43,8 @@
 			device_type = "cpu";
 			linux,boot-cpu;
 			reg = <0>;
-			clock-frequency = <BE420E00>;   // 3192 MHz
-			timebase-frequency = <2F90838>; // 3192/64 MHz = 49.875 MHz
+			ibm,ppc-interrupt-server#s = <0 1>;
+			timebase-frequency = <2FAF080>; // 50 MHz
 			i-cache-size = <8000>;
 			i-cache-line-size = <80>;
 			d-cache-size = <8000>;
@@ -59,9 +59,9 @@
 		};
 		Xenon,PPE@1 {
 			device_type = "cpu";
-			reg = <1>;
-			clock-frequency = <BE420E00>;
-			timebase-frequency = <2F90838>;
+			reg = <2>;
+			ibm,ppc-interrupt-server#s = <2 3>;
+			timebase-frequency = <2FAF080>;
 			i-cache-size = <8000>;
 			i-cache-line-size = <80>;
 			d-cache-size = <8000>;
@@ -69,39 +69,9 @@
 		};
 		Xenon,PPE@2 {
 			device_type = "cpu";
-			reg = <2>;
-			clock-frequency = <BE420E00>;
-			timebase-frequency = <2F90838>;
-			i-cache-size = <8000>;
-			i-cache-line-size = <80>;
-			d-cache-size = <8000>;
-			d-cache-line-size = <80>;
-		};
-		Xenon,PPE@3 {
-			device_type = "cpu";
-			reg = <3>;
-			clock-frequency = <BE420E00>;
-			timebase-frequency = <2F90838>;
-			i-cache-size = <8000>;
-			i-cache-line-size = <80>;
-			d-cache-size = <8000>;
-			d-cache-line-size = <80>;
-		};
-		Xenon,PPE@4 {
-			device_type = "cpu";
 			reg = <4>;
-			clock-frequency = <BE420E00>;
-			timebase-frequency = <2F90838>;
-			i-cache-size = <8000>;
-			i-cache-line-size = <80>;
-			d-cache-size = <8000>;
-			d-cache-line-size = <80>;
-		};
-		Xenon,PPE@5 {
-			device_type = "cpu";
-			reg = <5>;
-			clock-frequency = <BE420E00>;
-			timebase-frequency = <2F90838>;
+			ibm,ppc-interrupt-server#s = <4 5>;
+			timebase-frequency = <2FAF080>;
 			i-cache-size = <8000>;
 			i-cache-line-size = <80>;
 			d-cache-size = <8000>;
