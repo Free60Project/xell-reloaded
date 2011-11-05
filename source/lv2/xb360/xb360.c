@@ -408,7 +408,7 @@ int updateXeLL(char *path)
 	     memcpy(&pagebuf[sfc.page_sz],&spare[j*sfc.meta_sz],sfc.meta_sz);
 	     j++;
 
-	     if (!(sfcx_is_pageempty(pagebuf))) // We dont need to write to erased pages
+	     if (!(sfcx_is_pageerased(pagebuf))) // We dont need to write to erased pages
 	     {
              memset(&pagebuf[sfc.page_sz+0x0C],0x0, 4); //zero only EDC bytes
              sfcx_calcecc((unsigned int *)pagebuf); 	  //recalc EDC bytes
