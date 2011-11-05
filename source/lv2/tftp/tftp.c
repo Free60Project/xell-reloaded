@@ -126,6 +126,7 @@ int do_tftp(void *target, int maxlen, struct ip_addr server, const char *file)
 	tftp_state = TFTP_STATE_RRQ_SEND;
 	current_block = 0;
 	last_size = 0;
+	ptr = 0;
 	
 	start=mftb();
 	
