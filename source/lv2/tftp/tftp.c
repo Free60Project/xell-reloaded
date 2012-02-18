@@ -110,7 +110,7 @@ int send_ack(struct udp_pcb *pcb)
 
 				if (!p)
 				{
-					PRINT_ERR("internal error: out of memory!\n");
+					printf("internal error: out of memory!\n");
 					return -1;
 				}
 				
@@ -123,7 +123,7 @@ int send_ack(struct udp_pcb *pcb)
 				
 				if (udp_send(pcb, p))
 				{
-					PRINT_ERR("TFTP: packet send error.");
+					printf("TFTP: packet send error.");
 					pbuf_free(p);
 					return -1;
 				}
