@@ -17,6 +17,7 @@
 
 extern char elfhdr[];
 extern struct XCONFIG_SECURED_SETTINGS secured_settings;
+extern void wait_and_cleanup_line();
 
 extern struct sfc sfc;
 
@@ -129,7 +130,6 @@ int get_virtual_fuses(unsigned char *v_cpukey)
     //now we need to verify the data somehow
   if (data[0x0]==0xC0 && data[0x1]==0xFF && data[0x2] == 0xFF && data[0x3] == 0xFF)
   {
-	int i;
 	memcpy(v_cpukey,&data[0x20],0x10);
     	return 0;
   }
@@ -314,6 +314,8 @@ int updateXeLL(char *path)
     unsigned char *updxell, *user, *spare;
     
     /* Check if updxell.bin is present */
+    wait_and_cleanup_line();
+    printf("Trying %s...",path);
     f = fopen(path, "rb");
     if (!f){
         return -1; //Can't find/open updxell.bin from USB
@@ -335,7 +337,7 @@ int updateXeLL(char *path)
         return -1;
     }
     
-    printf(" * found XeLL update. press power NOW if you don't want to update.\n");
+    printf("\n * found XeLL update. press power NOW if you don't want to update.\n");
     delay(15);
     
     for (k = 0; k < XELL_OFFSET_COUNT; k++)
