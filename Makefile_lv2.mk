@@ -21,7 +21,7 @@ SOURCES		:=	source/lv2 source/lv2/crypt source/lv2/xb360 source/lv2/tftp source/
 DATA		:=	data
 INCLUDES	:=	source/lv2
 
-RELEASE=0.991
+RELEASE='$(shell git describe --tags $(shell git rev-list --tags --max-count=1))'
 
 #---------------------------------------------------------------------------------
 # options for code generation
