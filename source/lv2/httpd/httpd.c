@@ -16,7 +16,7 @@
 
 #include "network/network.h"
 #include "httpd/httpd_flash.h"
-
+#include "httpd/httpd_fuse.h"
 #include "httpd_keyvault.h"
 #include "httpd_keyvault2.h"
 
@@ -815,7 +815,7 @@ struct httpd_handler http_handler[]=
 #ifndef UNIX
 		{response_mem_process_request, 0, 0, response_mem_do_header, response_mem_do_data, 0, response_mem_finish},
 #endif
-		{response_fuses_process_request, 0, 0, 0, response_static_do_data, 0, response_static_finish},
+		{response_fuse_process_request, 0, 0, response_fuse_do_header, response_fuse_do_data, 0, response_fuse_finish},
 #ifdef HTTPD_VFS		
 		{response_vfs_process_request, 0, 0, response_vfs_do_header, response_vfs_do_data, 0, response_vfs_finish},
 #else

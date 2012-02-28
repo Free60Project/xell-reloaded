@@ -98,7 +98,7 @@ int cpu_get_key(unsigned char *data)
 	return 0;
 }
 
-int vfuses_read(unsigned char *data)
+int virtualfuses_read(unsigned char *data)
 {
   int vfuses_offset = 0x95000; //Page (0x4A8 * 0x200)
   if (sfc.initialized != SFCX_INITIALIZED)
@@ -114,23 +114,23 @@ int vfuses_read(unsigned char *data)
 }
 
 
-int get_virtual_fuses(unsigned char *v_cpukey)
+int get_virtual_cpukey(unsigned char *data)
 {
   int result = 0;
-  unsigned char data[MAX_PAGE_SZ];
-  result = vfuses_read(data);
+  unsigned char buffer[MAX_PAGE_SZ];
+  result = virtualfuses_read(buffer);
 
   if (result!=0)
   {
-     printf("vfuses_read() failure");
+     printf(" ! SFCX error while reading virtualfuses\n");
      return result;
   }
 
     //if we got here then it was at least able to read from nand
     //now we need to verify the data somehow
-  if (data[0x0]==0xC0 && data[0x1]==0xFF && data[0x2] == 0xFF && data[0x3] == 0xFF)
+  if (buffer[0]==0xC0 && buffer[1]==0xFF && buffer[2]==0xFF && buffer[3]==0xFF)
   {
-	memcpy(v_cpukey,&data[0x20],0x10);
+	memcpy(data,&buffer[0x20],0x10);
     	return 0;
   }
   else
@@ -155,7 +155,7 @@ int kv_get_key(unsigned char keyid, unsigned char *keybuf, int *keybuflen, unsig
 }
 
 
-int kv_read(unsigned char *data, int v_cpukey)
+int kv_read(unsigned char *data, int virtualcpukey)
 {
 	int page=0;
 	int pages=0;
@@ -191,8 +191,8 @@ int kv_read(unsigned char *data, int v_cpukey)
 	}
 
 	unsigned char cpu_key[0x10];
-        if (v_cpukey)
-            get_virtual_fuses(cpu_key);
+        if (virtualcpukey)
+            get_virtual_cpukey(cpu_key);
         else
             cpu_get_key(cpu_key);
 	//print_key("kv_read: cpu key", cpu_key);
@@ -260,7 +260,7 @@ int kv_get_dvd_key(unsigned char *dvd_key)
 	int keylen = 0x10;
 
 	result = kv_read(buffer, 0);
-        if (result == 2 && get_virtual_fuses(tmp) == 0){
+        if (result == 2 && get_virtual_cpukey(tmp) == 0){
             printf("! Attempting to decrypt DVDKey with Virtual CPU Key !\n");
             result = kv_read(buffer, 1);
         }
@@ -297,7 +297,7 @@ void print_cpu_dvd_keys(void)
 		print_key(" * your cpu key", key);
 		
 	memset(key, '\0',sizeof(key));
-	if (get_virtual_fuses(key)==0)
+	if (get_virtual_cpukey(key)==0)
 		print_key(" * your virtual cpu key", key);
 
 	memset(key, '\0', sizeof(key));
