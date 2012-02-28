@@ -53,7 +53,8 @@ int response_keyvault_process_request(struct http_state *http, const char *metho
 		return 0;
 	}
 
-	if(kv_read(priv->base,0)!=0){
+	if(kv_read(priv->base,0)!=0)
+	 if(kv_read(priv->base,1)!=0){ // Try decrypt with virtual cpukey 
 		priv->hdr_state = HTTPD_SERVER_CLOSE;
 		priv->ptr = 0;
 		http->code = 500;
