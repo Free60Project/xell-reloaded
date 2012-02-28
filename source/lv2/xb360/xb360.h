@@ -92,9 +92,9 @@ typedef struct kventry {
 
 void print_key(char *name, unsigned char *data);
 int cpu_get_key(unsigned char *data);
-int vfuses_read(unsigned char *data);
-int get_virtual_fuses(unsigned char *v_cpukey);
-int kv_read(unsigned char *data, int v_cpukey);
+int virtualfuses_read(unsigned char *data);
+int get_virtual_cpukey(unsigned char *data);
+int kv_read(unsigned char *data, int virtualcpukey);
 int kv_get_dvd_key(unsigned char *dvd_key);
 int kv_get_key(unsigned char keyid, unsigned char *keybuf, int *keybuflen, unsigned char *keyvault);
 void print_cpu_dvd_keys(void);
