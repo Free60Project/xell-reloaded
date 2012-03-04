@@ -2,18 +2,6 @@ XeLL-Reloaded
 
 A Xenon Linux loader based on Xell by tmbinc(Felix Domke)
 
-Contributed to by:
-[cOz]
-Cancerous1
-Ced2911
-GliGli
-Juvenal
-Natelx
-Redline99
-sk1080
-Tuxuser
-... and you?
-
 XeLL-Reloaded catches CPU threads, sets them up, loads an ELF file from either network (tftp), USB(fat), CDROM (ISO9660) or HDD(fat), and launches it. It's made to boot Linux, so it contains a flat device tree for Linux. However, it is able to load other ELF files as well, like applications based on LibXenon.
 
 * Now based on LibXenon
@@ -82,8 +70,10 @@ It can serve the CPUKey/DVDKey and the console's flashdump.
 
 Troubleshooting:
 
-updxell.bin doesn't get found / updxell process doesn't start: You have to rebuild your whole hackimage with a recent XeLL. From there on you can use the inbuilt update feature
-updxell function reports that no XeLL binary was found in NAND: Either your XeLL in NAND is too old or it's not a XeLL Reloaded binary - You have to rebuild your whole hackimage with a recent XeLL.
+updxell.bin doesn't get found / updxell process doesn't start:
+--You have to rebuild your whole hackimage with a recent XeLL. From there on you can use the inbuilt update feature
+updxell function reports that no XeLL binary was found in NAND:
+--Either your XeLL in NAND is too old or it's not a XeLL Reloaded binary - You have to rebuild your whole hackimage with a recent XeLL.
 
 
   FLASHING NAND
@@ -96,7 +86,8 @@ updxell function reports that no XeLL binary was found in NAND: Either your XeLL
 
 Troubleshooting:
 
-XBox does not boot properly after flashing the NAND: Either your image wasn't properly remapped or you made something wrong while building the image
+XBox does not boot properly after flashing the NAND:
+--Either your image wasn't properly remapped or you made something wrong while building the image
 
 
   USING KBOOT.CONF
@@ -128,5 +119,7 @@ XBox does not boot properly after flashing the NAND: Either your image wasn't pr
 Troubleshooting:
 
 kboot.conf gets found but it doesn't show bootentries or autoloads a bootentry:
-Make sure timeout is set to something higher than 0
-Make sure you didn't forget the "" on the bootentry: label="kernelpath params"
+--Make sure timeout is set to something higher than 0
+--Make sure you didn't forget the "" on the bootentry: label="kernelpath params"
+--Also take care of using a texteditor which doesnt automatically break lines if they are too long (will break bootentries), also it shouldn't
+modificate the encoding and lineendings of the config!
