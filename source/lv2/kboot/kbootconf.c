@@ -116,6 +116,7 @@ void kboot_set_config(void)
         if(conf.videomode > VIDEO_MODE_AUTO && conf.videomode <= VIDEO_MODE_NTSC && oldvideomode != conf.videomode){
             oldvideomode = conf.videomode;
             xenos_init(conf.videomode);
+	    console_init();
             printf(" * Xenos re-initalized\n");
         }
 	
@@ -350,6 +351,10 @@ int user_prompt(int defaultchoice, int max, int timeout) {
     
     if (defaultchoice < 0) defaultchoice = 0;
     
+    /* Remove possibly cached input on UART */
+    while (kbhit())
+	getch();
+
     while (delta <= timeout || timeout_disabled) {
         
        /* measure seconds since menu start */
