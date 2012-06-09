@@ -115,8 +115,14 @@ void launch_elf(void * addr, unsigned len){
 	}
         
 check_hdr:
+	//Check for updxell
+	if (!memcmp(addr + XELL_FOOTER_OFFSET, XELL_FOOTER, XELL_FOOTER_LENGTH) && len == XELL_SIZE)
+	{
+		printf(" * Found UpdXeLL binary...\n");
+		updateXeLL(addr,len);
+	}
 	//Check elf header
-	if (!memcmp(addr, elfhdr, 4))
+	else if (!memcmp(addr, elfhdr, 4))
 	{
 		printf(" * Found ELF...\n");
 		elf_runWithDeviceTree(addr,len,dt_blob_start,dt_blob_end-dt_blob_start);
@@ -282,7 +288,7 @@ int main(){
 	for(;;){
 		// try USB
 		try_rawflash("uda:/updflash.bin");
-		updateXeLL("uda:/updxell.bin");
+		try_load_elf("uda:/updxell.bin");
 		try_load_elf("uda:/kboot.conf");
 		try_load_elf("uda:/xenon.elf");
 		try_load_elf("uda:/xenon.z");
@@ -295,7 +301,7 @@ int main(){
 		
 		// try CD/DVD
 		try_rawflash("dvd:/updflash.bin");
-		updateXeLL("dvd:/updxell.bin");
+		try_load_elf("dvd:/updxell.bin");
 		try_load_elf("dvd:/kboot.conf");
 		try_load_elf("dvd:/xenon.elf");
 		try_load_elf("dvd:/xenon.z");
@@ -303,7 +309,7 @@ int main(){
 
 		// try Hard Drive
 		try_rawflash("sda:/updflash.bin");
-		updateXeLL("sda:/updxell.bin");
+		try_load_elf("sda:/updxell.bin");
 		try_load_elf("sda:/kboot.conf");
 		try_load_elf("sda:/xenon.elf");
 		try_load_elf("sda:/xenon.z");

@@ -307,34 +307,14 @@ void print_cpu_dvd_keys(void)
 	printf("\n");
 }
 
-int updateXeLL(char *path)
+int updateXeLL(void * addr, unsigned len)
 {
-    FILE *f;
-    int i, j, k, status, startblock, current, offsetinblock, blockcnt, filelength;
-    unsigned char *updxell, *user, *spare;
-    
-    /* Check if updxell.bin is present */
-    wait_and_cleanup_line();
-    printf("Trying %s...",path);
-    f = fopen(path, "rb");
-    if (!f){
-        return -1; //Can't find/open updxell.bin from USB
-    }
+	int i, j, k, status, startblock, current, offsetinblock, blockcnt;
+	unsigned char *user, *spare;
     
     if (sfc.initialized != SFCX_INITIALIZED){
-        fclose(f);
         printf(" ! sfcx is not initialized! Unable to update XeLL in NAND!\n");
 	return -1;
-    }
-   
-    /* Check filesize of updxell.bin, only accept full 256kb binaries */
-    fseek(f, 0, SEEK_END);
-    filelength=ftell(f);
-    fseek(f, 0, SEEK_SET);
-    if (filelength != XELL_SIZE){
-        fclose(f);
-        printf(" ! %s does not have the correct size of 256kb. Aborting update!\n", path);
-        return -1;
     }
     
     printf("\n * found XeLL update. press power NOW if you don't want to update.\n");
@@ -372,32 +352,8 @@ int updateXeLL(char *path)
       
         if (memcmp(&user[offsetinblock+(XELL_FOOTER_OFFSET)],XELL_FOOTER,XELL_FOOTER_LENGTH) == 0){
             printf(" * XeLL Binary in NAND found @ 0x%08X\n", (startblock*sfc.block_sz)+offsetinblock);
-        
-         updxell = (unsigned char*)malloc(XELL_SIZE);
-         if(!updxell){
-           printf(" ! Error while memallocating filebuffer (updxell)\n");
-           return -1;
-         }
-        
-         status = fread(updxell,1,XELL_SIZE,f);
-         if (status != XELL_SIZE){
-           fclose(f);
-           printf(" ! Error reading file from %s\n", path);
-           return -1;
-         }
-	 	 
-	 if (!memcmp(updxell, elfhdr, 4)){
-	   printf(" ! really, we don't need an elf.\n");
-	   return -1;
-	 }
-
-         if (memcmp(&updxell[XELL_FOOTER_OFFSET],XELL_FOOTER, XELL_FOOTER_LENGTH)){
-	   printf(" ! XeLL does not seem to have matching footer, Aborting update!\n");
-	   return -1;
-	 }
          
-         fclose(f);
-         memcpy(&user[offsetinblock], updxell,XELL_SIZE); //Copy over updxell.bin
+         memcpy(&user[offsetinblock], addr,len); //Copy over updxell.bin
          printf(" * Writing to NAND!\n");
 	 j = 0;
          for (i = startblock*sfc.pages_in_block; i < (startblock+blockcnt)*sfc.pages_in_block; i ++)
@@ -425,5 +381,3 @@ int updateXeLL(char *path)
     printf(" ! Couldn't locate XeLL binary in NAND. Aborting!\n");
     return -1;
 }
-
-

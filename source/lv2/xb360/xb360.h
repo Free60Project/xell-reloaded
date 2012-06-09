@@ -98,6 +98,6 @@ int kv_read(unsigned char *data, int virtualcpukey);
 int kv_get_dvd_key(unsigned char *dvd_key);
 int kv_get_key(unsigned char keyid, unsigned char *keybuf, int *keybuflen, unsigned char *keyvault);
 void print_cpu_dvd_keys(void);
-int updateXeLL(char *path);
+int updateXeLL(void * addr, unsigned len);
 
 #endif /* XB360_H_ */
