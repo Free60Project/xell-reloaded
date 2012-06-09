@@ -36,7 +36,7 @@ static unsigned char *base;
 static int image_maxlen;
 
 
-extern void launch_elf(void * addr, unsigned len);
+extern void launch_file(void * addr, unsigned len);
 
 static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_addr *addr, u16_t port)
 {
@@ -302,7 +302,7 @@ int boot_tftp(const char *server_addr, const char *tftp_bootfile)
 		return res;
 	}
 	
-	launch_elf(elf_raw,res);
+	launch_file(elf_raw,res);
 	
 	free(elf_raw);
 	return 0;

@@ -40,12 +40,12 @@ static struct controller_data_s ctrl;
 static struct controller_data_s old_ctrl;
 
 /* main.c */
-extern int try_load_elf(char *filename);
+extern int try_load_file(char *filename);
 extern char *boot_server_name();
 /* network.h */
 extern struct netif netif;
 
-#define LOAD_FILE(x) {if(!strncmp(x,"uda:/",4)||!strncmp(x,"dvd:/",4)||!strncmp(x,"sda:/",4))try_load_elf(x); else boot_tftp(boot_server_name(),x);}
+#define LOAD_FILE(x) {if(!strncmp(x,"uda:/",4)||!strncmp(x,"dvd:/",4)||!strncmp(x,"sda:/",4))try_load_file(x); else boot_tftp(boot_server_name(),x);}
 
 char *strip(char *buf)
 {

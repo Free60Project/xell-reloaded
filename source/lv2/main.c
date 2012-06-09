@@ -87,7 +87,7 @@ char *boot_file_name()
 	return "/tftpboot/xenon";
 }
 
-void launch_elf(void * addr, unsigned len){
+void launch_file(void * addr, unsigned len){
         int gzipped_initrd = 0;
 	//check if addr point to a gzip file
 	unsigned char * gzip_file = (unsigned char *)addr;
@@ -96,7 +96,7 @@ void launch_elf(void * addr, unsigned len){
 		printf(" * Found a gzip file...\n");
 		if(inflate_compare_header((char*)addr, len, cpiohdr, 4, 1) == 0){
 			gzipped_initrd = 1;
-			goto check_hdr;
+			goto check_magic;
 		}
 		char * dest = malloc(ELF_MAXSIZE);
 		int destsize = 0;
@@ -114,7 +114,7 @@ void launch_elf(void * addr, unsigned len){
 		}
 	}
         
-check_hdr:
+check_magic:
 	//Check for updxell
 	if (!memcmp(addr + XELL_FOOTER_OFFSET, XELL_FOOTER, XELL_FOOTER_LENGTH) && len == XELL_SIZE)
 	{
@@ -143,7 +143,7 @@ check_hdr:
                 printf("! Bad header!\n");
 }
 
-int try_load_elf(char *filename)
+int try_load_file(char *filename)
 {
 	wait_and_cleanup_line();
 	printf("Trying %s...",filename);
@@ -169,7 +169,7 @@ int try_load_elf(char *filename)
 		return r;
 	}
 
-	launch_elf(buf,r);
+	launch_file(buf,r);
 
 	free(buf);
 	return 0;
@@ -288,11 +288,11 @@ int main(){
 	for(;;){
 		// try USB
 		try_rawflash("uda:/updflash.bin");
-		try_load_elf("uda:/updxell.bin");
-		try_load_elf("uda:/kboot.conf");
-		try_load_elf("uda:/xenon.elf");
-		try_load_elf("uda:/xenon.z");
-		try_load_elf("uda:/vmlinux");
+		try_load_file("uda:/updxell.bin");
+		try_load_file("uda:/kboot.conf");
+		try_load_file("uda:/xenon.elf");
+		try_load_file("uda:/xenon.z");
+		try_load_file("uda:/vmlinux");
 		
 		// try network
 		wait_and_cleanup_line();
@@ -301,19 +301,19 @@ int main(){
 		
 		// try CD/DVD
 		try_rawflash("dvd:/updflash.bin");
-		try_load_elf("dvd:/updxell.bin");
-		try_load_elf("dvd:/kboot.conf");
-		try_load_elf("dvd:/xenon.elf");
-		try_load_elf("dvd:/xenon.z");
-		try_load_elf("dvd:/vmlinux"); 
+		try_load_file("dvd:/updxell.bin");
+		try_load_file("dvd:/kboot.conf");
+		try_load_file("dvd:/xenon.elf");
+		try_load_file("dvd:/xenon.z");
+		try_load_file("dvd:/vmlinux"); 
 
 		// try Hard Drive
 		try_rawflash("sda:/updflash.bin");
-		try_load_elf("sda:/updxell.bin");
-		try_load_elf("sda:/kboot.conf");
-		try_load_elf("sda:/xenon.elf");
-		try_load_elf("sda:/xenon.z");
-		try_load_elf("sda:/vmlinux");
+		try_load_file("sda:/updxell.bin");
+		try_load_file("sda:/kboot.conf");
+		try_load_file("sda:/xenon.elf");
+		try_load_file("sda:/xenon.z");
+		try_load_file("sda:/vmlinux");
 
 		//subsystem servicing
 		usb_do_poll();
