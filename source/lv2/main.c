@@ -263,6 +263,10 @@ int main(){
 	printf(" * sata dvd init\n");
 	xenon_atapi_init();
 
+	mount_all_devices();
+
+	findDevices();
+
 	/* display some cpu info */
 	printf(" * CPU PVR: %08x\n", mfspr(287));
 
