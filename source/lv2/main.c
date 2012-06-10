@@ -10,6 +10,7 @@
 #include <time/time.h>
 #include <ppc/timebase.h>
 #include <usb/usbmain.h>
+#include <sys/iosupport.h>
 #include <ppc/register.h>
 #include <xenon_nand/xenon_sfcx.h>
 #include <xenon_nand/xenon_config.h>
@@ -39,6 +40,7 @@ extern char *kboot_tftp;
 const unsigned char elfhdr[] = {0x7f, 'E', 'L', 'F'};
 const unsigned char cpiohdr[] = {0x30, 0x37, 0x30, 0x37};
 const unsigned char kboothdr[] = "#KBOOTCONFIG";
+const unsigned char *filenames[] = {"updxell.bin","kboot.conf","xenon.elf","xenon.z","vmlinux", NULL};
 
 void do_asciiart()
 {
@@ -175,6 +177,22 @@ int try_load_file(char *filename)
 	return 0;
 }
 
+void fileloop() {
+        char filepath[255];
+
+        int i,j=0;
+        for (i = 3; i < 16; i++) {
+                if (devoptab_list[i]->structSize) {
+                        do{
+                           sprintf(filepath, "%s:/%s%c", devoptab_list[i]->name,filenames[j],'\0');
+						   try_load_file(filepath);
+                           j++;
+                        } while(filenames[j] != NULL);
+                        j = 0;
+                }
+        }
+}
+
 char FUSES[350]; /* this string stores the ascii dump of the fuses */
 
 unsigned char stacks[6][0x10000];
@@ -290,34 +308,13 @@ int main(){
 #endif
 	printf("\n * Looking for xenon.elf or vmlinux on USB/CD/DVD or user-defined file via TFTP...\n\n");
 	for(;;){
-		// try USB
-		try_rawflash("uda:/updflash.bin");
-		try_load_file("uda:/updxell.bin");
-		try_load_file("uda:/kboot.conf");
-		try_load_file("uda:/xenon.elf");
-		try_load_file("uda:/xenon.z");
-		try_load_file("uda:/vmlinux");
+		
+		fileloop();
 		
 		// try network
 		wait_and_cleanup_line();
 		printf("Trying TFTP %s:%s... ",boot_server_name(),boot_file_name());
 		boot_tftp(boot_server_name(),boot_file_name());
-		
-		// try CD/DVD
-		try_rawflash("dvd:/updflash.bin");
-		try_load_file("dvd:/updxell.bin");
-		try_load_file("dvd:/kboot.conf");
-		try_load_file("dvd:/xenon.elf");
-		try_load_file("dvd:/xenon.z");
-		try_load_file("dvd:/vmlinux"); 
-
-		// try Hard Drive
-		try_rawflash("sda:/updflash.bin");
-		try_load_file("sda:/updxell.bin");
-		try_load_file("sda:/kboot.conf");
-		try_load_file("sda:/xenon.elf");
-		try_load_file("sda:/xenon.z");
-		try_load_file("sda:/vmlinux");
 
 		//subsystem servicing
 		usb_do_poll();
