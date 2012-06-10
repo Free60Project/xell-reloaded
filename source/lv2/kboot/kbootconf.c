@@ -45,7 +45,8 @@ extern char *boot_server_name();
 /* network.h */
 extern struct netif netif;
 
-#define LOAD_FILE(x) {if(!strncmp(x,"uda:/",4)||!strncmp(x,"dvd:/",4)||!strncmp(x,"sda:/",4))try_load_file(x); else boot_tftp(boot_server_name(),x);}
+/* If filename includes ':' it's seen as valid mountname */
+#define LOAD_FILE(x) {if(strrchr(x,':')!= NULL)try_load_file(x); else boot_tftp(boot_server_name(),x);}
 
 char *strip(char *buf)
 {
