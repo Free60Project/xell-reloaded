@@ -11,7 +11,7 @@
 
 /* Filesystem drivers */
 
-//#define FS_ISO9660
+#define FS_ISO9660
 #define FS_FAT
 #define FS_EXT2FS
 #define FS_XTAF

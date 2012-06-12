@@ -24,6 +24,9 @@
 #ifdef FS_XTAF
 #include <libxtaf/xtaf.h>
 #endif
+#ifdef FS_ISO9660
+#include <iso9660/iso9660.h>
+#endif
 
 extern DISC_INTERFACE xenon_atapi_ops;
 extern DISC_INTERFACE xenon_ata_ops;
@@ -172,6 +175,9 @@ static void AddPartition(sec_t sector, int device, int type, int *devnum) {
 
 	if (device == DEVICE_USB)
 		disc = (DISC_INTERFACE *) & usb2mass_ops;
+	
+	else if(device == DEVICE_ATAPI)
+		disc = (DISC_INTERFACE *) & xenon_atapi_ops;
 
 	char mount[10];
 	sprintf(mount, "%s%i", prefix[device], *devnum);
@@ -489,10 +495,6 @@ static void UnmountPartitions(int device) {
 				part[device][i].type = 0;
 				sprintf(mount, "%s:", part[device][i].mount);
 				ISO9660_Unmount(mount);
-				if (dvdcss) {
-					dvdcss_close(dvdcss);
-					dvdcss = NULL;
-				}
 				break;
 #endif
 		}
@@ -515,6 +517,9 @@ void mount_all_devices() {
 		if (XTAFMount() == 0)
 #endif
 			FindPartitions(DEVICE_ATA);
+	}
+	if (xenon_atapi_ops.isInserted()) {
+		FindPartitions(DEVICE_ATAPI);
 	}
 }
 
