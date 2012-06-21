@@ -4,9 +4,9 @@ used for zlib support ...
 
 #include <assert.h>
 #include <string.h>
+#include <zlib.h>
 
 #include "config.h"
-#include "zlib.h"
 
 #define CHUNK 16384
 

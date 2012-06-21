@@ -29,7 +29,7 @@
 
 #include "asciiart.h"
 #include "config.h"
-#include "zlib/xell_lib.h"
+#include "decompress.h"
 #include "tftp/tftp.h"
 #include "kboot/kbootconf.h"
 
