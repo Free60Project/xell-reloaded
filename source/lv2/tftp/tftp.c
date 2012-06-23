@@ -35,6 +35,7 @@ static uint64_t ts, start;
 static unsigned char *base;
 static int image_maxlen;
 
+extern char *kboot_tftp;
 
 extern void launch_file(void * addr, unsigned len);
 
@@ -338,4 +339,26 @@ extern int boot_tftp_url(const char *url)
 	}
 	
 	return boot_tftp(server_addr, bootfile);
+}
+
+char *boot_server_name()
+{       
+	if (kboot_tftp && kboot_tftp[0])
+		return kboot_tftp;
+            
+	if (netif.dhcp && netif.dhcp->boot_server_name[0])
+    	return netif.dhcp->boot_server_name;
+	
+	if (netif.dhcp && netif.dhcp->offered_si_addr.addr)
+    	return ipaddr_ntoa(&netif.dhcp->offered_si_addr);
+
+	return "192.168.1.98";
+}
+
+char *boot_file_name()
+{
+	if (netif.dhcp && *netif.dhcp->boot_file_name)
+		return netif.dhcp->boot_file_name;
+
+	return "/tftpboot/xenon";
 }
