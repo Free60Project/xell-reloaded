@@ -27,6 +27,7 @@ see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 
 #include "tftp/tftp.h"
 #include "kbootconf.h"
+#include "file.h"
 
 int boot_entry;
 char conf_buf[MAX_KBOOTCONF_SIZE];
@@ -39,14 +40,11 @@ enum ir_remote_codes IR;
 static struct controller_data_s ctrl;
 static struct controller_data_s old_ctrl;
 
-/* main.c */
-extern int try_load_file(char *filename);
-extern char *boot_server_name();
 /* network.h */
 extern struct netif netif;
 
 /* If filename includes ':' it's seen as valid mountname */
-#define LOAD_FILE(x) {if(strrchr(x,':')!= NULL)try_load_file(x); else boot_tftp(boot_server_name(),x);}
+#define LOAD_FILE(filename,type) {if(strrchr(filename,':')!= NULL)try_load_file(filename,type); else boot_tftp(boot_server_name(),filename,type);}
 
 char *strip(char *buf)
 {
@@ -477,11 +475,11 @@ void try_kbootconf(void * addr, unsigned len){
     if (conf.kernels[boot_entry].initrd)
     {
         printf("Loading initrd ...\n");
-        LOAD_FILE(conf.kernels[boot_entry].initrd);
+        LOAD_FILE(conf.kernels[boot_entry].initrd,TYPE_INITRD);
      }
 
      printf("Loading kernel ...\n");
-     LOAD_FILE(conf.kernels[boot_entry].kernel);
+     LOAD_FILE(conf.kernels[boot_entry].kernel,TYPE_ELF);
                 
     memset(conf_buf,0,MAX_KBOOTCONF_SIZE);
     conf.num_kernels = 0;

@@ -152,19 +152,11 @@ int main(){
 	print_cpu_dvd_keys();
 	network_print_config();
 #endif
-	printf("\n * Looking for xenon.elf or vmlinux on USB/CD/DVD or user-defined file via TFTP...\n\n");
+	printf("\n * Looking for files on local media and TFTP...\n\n");
 	for(;;){
 		
 		fileloop();
-		
-		// try network
-		wait_and_cleanup_line();
-		printf("Trying TFTP %s:%s... ",boot_server_name(),boot_file_name());
-		boot_tftp(boot_server_name(),boot_file_name());
-
-		//subsystem servicing
-		usb_do_poll();
-		network_poll();
+                tftp_loop();
 	}
 
 	return 0;

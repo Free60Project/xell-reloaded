@@ -17,6 +17,7 @@
 #include <ppc/timebase.h>
 #include <network/network.h>
 #include "config.h"
+#include "file.h"
 
 #define TFTP_STATE_RRQ_SEND 0
 #define TFTP_STATE_ACK_SEND 1
@@ -36,8 +37,6 @@ static unsigned char *base;
 static int image_maxlen;
 
 extern char *kboot_tftp;
-
-extern void launch_file(void * addr, unsigned len);
 
 static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_addr *addr, u16_t port)
 {
@@ -264,7 +263,7 @@ int do_tftp(void *target, int maxlen, struct ip_addr server, const char *file)
 }
 
 
-int boot_tftp(const char *server_addr, const char *tftp_bootfile)
+int boot_tftp(const char *server_addr, const char *tftp_bootfile, int filetype)
 {
 	char *args = strchr(tftp_bootfile, ' ');
 	if (args)
@@ -303,7 +302,7 @@ int boot_tftp(const char *server_addr, const char *tftp_bootfile)
 		return res;
 	}
 	
-	launch_file(elf_raw,res);
+	launch_file(elf_raw,res,filetype);
 	
 	free(elf_raw);
 	return 0;
@@ -338,7 +337,7 @@ extern int boot_tftp_url(const char *url)
 		bootfile = url;
 	}
 	
-	return boot_tftp(server_addr, bootfile);
+	return boot_tftp(server_addr, bootfile, TYPE_ELF);
 }
 
 char *boot_server_name()
