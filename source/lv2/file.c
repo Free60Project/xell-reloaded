@@ -16,6 +16,7 @@ used for zlib support ...
 #include <console/console.h>
 #include <sys/iosupport.h>
 #include <ppc/timebase.h>
+#include <xenon_nand/xenon_sfcx.h>
 
 #include "config.h"
 #include "file.h"
@@ -152,9 +153,6 @@ void launch_file(void * addr, unsigned len, int filetype){
                 printf(" * Loading kboot.conf ...\n");
                 try_kbootconf(addr,len);
                 break;
-            case TYPE_NANDIMAGE:
-                printf(" * Attemping to flash NAND ...\n");
-                break;
             case TYPE_UPDXELL:
                 if (memcmp(addr + XELL_FOOTER_OFFSET, XELL_FOOTER, XELL_FOOTER_LENGTH) || len != XELL_SIZE)
                     return;
@@ -168,6 +166,11 @@ void launch_file(void * addr, unsigned len, int filetype){
 
 int try_load_file(char *filename, int filetype)
 {
+	if(filetype == TYPE_NANDIMAGE){
+		try_rawflash(filename);
+		return;
+	}
+	
 	wait_and_cleanup_line();
 	printf("Trying %s...",filename);
 	
@@ -191,7 +194,7 @@ int try_load_file(char *filename, int filetype)
 		free(buf);
 		return r;
 	}
-                
+
 	launch_file(buf,r,filetype);
 
 	free(buf);
