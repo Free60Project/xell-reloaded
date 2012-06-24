@@ -2,7 +2,8 @@ XeLL-Reloaded
 
 A Xenon Linux loader based on Xell by tmbinc(Felix Domke)
 
-XeLL-Reloaded catches CPU threads, sets them up, loads an ELF file from either network (tftp), USB(fat), CDROM (ISO9660) or HDD(fat), and launches it. It's made to boot Linux, so it contains a flat device tree for Linux. However, it is able to load other ELF files as well, like applications based on LibXenon.
+XeLL-Reloaded catches CPU threads, sets them up, loads an ELF file from either network (tftp), USB(fat/ext2fs), CDROM (ISO9660) or HDD(fat/ext2fs/xtaf), and launches it. 
+It's made to boot Linux, so it contains a flat device tree for Linux. However, it is able to load other ELF files as well, like applications based on LibXenon.
 
 * Now based on LibXenon
 * Supports the new Reset Glitch Hack - RGH. (xell-gggggg)
@@ -31,18 +32,26 @@ XeLL-Reloaded catches CPU threads, sets them up, loads an ELF file from either n
   HOW TO USE
 ==============
 
-XeLL Reloaded checks for *.elf(homebrew/linux elf32)/kboot.conf/updxell.bin or updflash.bin in the following order:
+XeLL Reloaded checks for ELF/UpdXeLL/Kboot-config or updflash.bin in the following order:
 
-USB (FAT):	updflash.bin
-		updxell.bin
-		kboot.conf
-		xenon.elf
-		xenon.z
-		vmlinux
-Network: 	DHCP supplied bootserver and bootfile-name. You can supply a static tftpserver ip via kboot.conf. If no tftpserver is found, it falls back to a static ip.
-		( no updxell or updflash support via tftp)
-DVD (ISO9660):	*same as USB*	
-HDD (FAT):	*same as USB*
+USB (FAT/EXT2FS)
+DVD(ISO9660)
+HDD(XTAF/FAT/EXT2FS):	updxell.bin
+						kboot.conf
+						xenon.elf
+						xenon.z
+						vmlinux
+						updflash.bin
+						
+Network: 				updxell.bin
+						kboot.conf
+						xenon.elf
+						xenon.z
+						vmlinux
+						updflash.bin (It will find that file, but refuse to flash it!)
+						DHCP supplied bootfile-name
+						* XeLL takes bootserver from DHCP, if supplied. You can supply a static tftpserver ip via kboot.conf. If no tftpserver is found, it falls back to a static ip.
+						* no updflash support via tftp !
 
 
 updflash.bin is a already remapped flashimage/nandimage. 16MB file for 16MB NAND and 64MB file for 64/256/512MB NAND.
@@ -64,8 +73,8 @@ It can serve the CPUKey/DVDKey and the console's flashdump.
 =================
 
 1. Rename the appropriate XeLL-binary to "updxell.bin". 
-2. Copy the updxell.bin file to the root of the FAT/FAT32 USB Stick or burn a ISO9660 CD
-3. Plug in the USB Stick/CD and boot up XeLL. It should find the update and flash it
+2. Supply the updxell.bin file to XeLL via USB/DVD/HDD or TFTP
+3. It should find the update and flash it
 4. Reboot your Xbox and enjoy the fresh XeLL build
 
 Troubleshooting:
@@ -80,8 +89,8 @@ updxell function reports that no XeLL binary was found in NAND:
 =================
 
 1. Rename the new (already remapped) flashimage to "updflash.bin"
-2. Copy the updflash.bin file to the root of the FAT/FAT32 USB Stick or burn a ISO9660 CD
-3. Plug in the USB Stick/CD and boot up XeLL. It should find the update and flash it
+2. Supply the updflash.bin file to XeLL via USB/DVD/HDD
+3. It should find the update and flash it
 4. Reboot your Xbox and enjoy the new image
 
 Troubleshooting:
@@ -95,7 +104,7 @@ XBox does not boot properly after flashing the NAND:
 
 1. Read and understand the kboot.conf.sample which is part of every XeLL release with kboot-support
 2. Modify the file to your needs
-3. Copy it, named as "kboot.conf, to a CD/FAT32 USB Stick/FAT32 HDD or supply it via TFTP
+3. Supply it, named as "kboot.conf, via USB/DVD/HDD or TFTP
 4. Boot XeLL and wait till it loads the file and shows the menu
 5. Navigate to the desired bootentry. You can do this in the following ways:
 	UART:	
