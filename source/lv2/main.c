@@ -154,9 +154,8 @@ int main(){
 #endif
 	printf("\n * Looking for files on local media and TFTP...\n\n");
 	for(;;){
-		
+        tftp_loop();
 		fileloop();
-                tftp_loop();
 	}
 
 	return 0;

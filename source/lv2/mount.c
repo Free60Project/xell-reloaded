@@ -511,15 +511,15 @@ static void UnmountPartitions(int device) {
 void mount_all_devices() {
 	FindPartitions(DEVICE_USB);
 	
-
+	if (xenon_atapi_ops.isInserted()) {
+		FindPartitions(DEVICE_ATAPI);
+	}
+	
 	if (xenon_ata_ops.isInserted()) {
 #ifdef FS_XTAF
 		if (XTAFMount() == 0)
 #endif
 			FindPartitions(DEVICE_ATA);
-	}
-	if (xenon_atapi_ops.isInserted()) {
-		FindPartitions(DEVICE_ATAPI);
 	}
 }
 
