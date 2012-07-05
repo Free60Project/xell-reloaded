@@ -412,7 +412,7 @@ int user_prompt(int defaultchoice, int max, int timeout) {
        if (get_controller_data(&ctrl, 0)) {
          if ((ctrl.a > old_ctrl.a) || (ctrl.start > old_ctrl.start))
              return defaultchoice;
-         else if ((ctrl.b > old_ctrl.b) || (ctrl.select > old_ctrl.select))
+         else if ((ctrl.b > old_ctrl.b) || (ctrl.back > old_ctrl.back))
              return -1;
          else if ((ctrl.up > old_ctrl.up) && (defaultchoice < max-1))
              defaultchoice++;
