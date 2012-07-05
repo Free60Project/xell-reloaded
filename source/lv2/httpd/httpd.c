@@ -773,21 +773,6 @@ static void response_mem_finish(struct http_state *http)
 	mem_free(priv);
 }
 
-static int response_fuses_process_request(struct http_state *http, const char *method, const char *url)
-{
-	if (strcmp(method, "GET"))
-		return 0;
-		
-	if (strcmp(url, "/FUSE"))
-		return 0;
-
-	extern char FUSES[350]; /* this has to be static */
-	http->code = 200;
-	response_static_process_request(http, FUSES);
-	return 1;
-}
-
-
  	/* ---------- err400 handler */
 
 static int response_err400_process_request(struct http_state *http, const char *method, const char *url)

@@ -46,7 +46,6 @@ char * fuse_strcat(char * dest, const char * src)
 
 int response_fuse_process_request(struct http_state *http, const char *method, const char *url)
 {
-  int i;
   char temp[150];
 
 	if (strcmp(method, "GET"))

@@ -15,6 +15,7 @@
 #include <xenon_nand/xenon_sfcx.h>
 #include <xenon_nand/xenon_config.h>
 #include <xenon_soc/xenon_secotp.h>
+#include <xenon_soc/xenon_power.h>
 #include <xenon_soc/xenon_io.h>
 #include <xenon_sound/sound.h>
 #include <xenon_smc/xenon_smc.h>
@@ -154,7 +155,7 @@ int main(){
 #endif
 	printf("\n * Looking for files on local media and TFTP...\n\n");
 	for(;;){
-        tftp_loop();
+                tftp_loop();
 		fileloop();
 	}
 

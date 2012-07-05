@@ -15,6 +15,7 @@ used for zlib support ...
 #include <network/network.h>
 #include <console/console.h>
 #include <sys/iosupport.h>
+#include <usb/usbmain.h>
 #include <ppc/timebase.h>
 #include <xenon_nand/xenon_sfcx.h>
 
@@ -22,6 +23,7 @@ used for zlib support ...
 #include "file.h"
 #include "xb360/xb360.h"
 #include "kboot/kbootconf.h"
+#include "tftp/tftp.h"
 
 #define CHUNK 16384
 
@@ -168,7 +170,7 @@ int try_load_file(char *filename, int filetype)
 {
 	if(filetype == TYPE_NANDIMAGE){
 		try_rawflash(filename);
-		return;
+		return -1;
 	}
 	
 	wait_and_cleanup_line();

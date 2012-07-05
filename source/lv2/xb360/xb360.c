@@ -6,6 +6,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time/time.h>
 #include <xenon_nand/xenon_sfcx.h>
 #include <xenon_nand/xenon_config.h>
@@ -309,7 +310,7 @@ void print_cpu_dvd_keys(void)
 
 int updateXeLL(void * addr, unsigned len)
 {
-	int i, j, k, status, startblock, current, offsetinblock, blockcnt;
+	int i, j, k, startblock, current, offsetinblock, blockcnt;
 	unsigned char *user, *spare;
     
     if (sfc.initialized != SFCX_INITIALIZED){
