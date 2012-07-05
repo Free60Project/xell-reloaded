@@ -821,7 +821,7 @@ struct httpd_handler http_handler[]=
 #else
 		{response_index_process_request, 0, 0, response_index_do_header, response_index_do_data, 0, response_index_finish},
 #endif
-		{response_flash_process_request,  0, 0, response_flash_do_header, response_flash_do_data, response_flash_finish},
+		{response_flash_process_request,  0, 0, response_flash_do_header, response_flash_do_data, 0, response_flash_finish},
 		{response_keyvault_process_request, 0, 0, response_keyvault_do_header, response_keyvault_do_data, 0, response_keyvault_finish},
 		{response_keyvault2_process_request, 0, 0, response_keyvault2_do_header, response_keyvault2_do_data, 0, response_keyvault2_finish},
 //		{response_setdvdkey_process_request, 0, 0, response_setdvdkey_do_header, response_setdvdkey_do_data, response_setdvdkey_finish},
