@@ -116,15 +116,12 @@ void wait_and_cleanup_line()
 }
 
 void launch_file(void * addr, unsigned len, int filetype){
-    
+        unsigned char * gzip_file;
         switch (filetype){
             
             case TYPE_ELF:
-                if (memcmp(addr, elfhdr, 4))
-                    return;
-                printf(" * Launching ELF...\n");
-                //check if addr point to a gzip file
-                unsigned char * gzip_file = (unsigned char *)addr;
+                // check if addr point to a gzip file
+                gzip_file = (unsigned char *)addr;
                 if((gzip_file[0]==0x1F)&&(gzip_file[1]==0x8B)){
                         //found a gzip file
                         printf(" * Found a gzip file...\n");
@@ -143,6 +140,9 @@ void launch_file(void * addr, unsigned len, int filetype){
                                 return;
                         }
                 }
+                if (memcmp(addr, elfhdr, 4))
+                    return;
+                printf(" * Launching ELF...\n");
                 elf_runWithDeviceTree(addr,len,dt_blob_start,dt_blob_end-dt_blob_start);
                 break;
             case TYPE_INITRD:
