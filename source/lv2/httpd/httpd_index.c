@@ -13,8 +13,8 @@
 #include <lwip/tcp.h>
 #include <xenon_soc/xenon_io.h>
 
-#include "network/network.h"
-#include "xb360/xb360.h"
+#include <network/network.h>
+#include <xb360/xb360.h>
 
 #include "httpd.h"
 #include "httpd_index.h"

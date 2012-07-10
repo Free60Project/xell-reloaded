@@ -8,12 +8,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <xenon_nand/xenon_sfcx.h>
+#include <xb360/xb360.h>
+//#include <lwip/debug.h>
+//#include <lwip/stats.h>
+#include <lwip/tcp.h>
+#include <network/network.h>
 
-#include "xb360/xb360.h"
-//#include "lwip/debug.h"
-//#include "lwip/stats.h"
-#include "lwip/tcp.h"
-#include "network/network.h"
 #include "httpd.h"
 #include "httpd_index.h"
 

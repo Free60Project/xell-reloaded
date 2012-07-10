@@ -18,10 +18,10 @@ used for zlib support ...
 #include <usb/usbmain.h>
 #include <ppc/timebase.h>
 #include <xenon_nand/xenon_sfcx.h>
+#include <xb360/xb360.h>
 
 #include "config.h"
 #include "file.h"
-#include "xb360/xb360.h"
 #include "kboot/kbootconf.h"
 #include "tftp/tftp.h"
 

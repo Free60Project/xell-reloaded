@@ -7,14 +7,14 @@
 #define mem_free free
 #define mem_malloc malloc
 #else
-#include "lwip/debug.h"
-#include "lwip/stats.h"
-#include "lwip/tcp.h"
+#include <lwip/debug.h>
+#include <lwip/stats.h>
+#include <lwip/tcp.h>
 #endif
 
 #include "httpd/httpd.h"
 
-#include "network/network.h"
+#include <network/network.h>
 #include "httpd/httpd_flash.h"
 #include "httpd/httpd_fuse.h"
 #include "httpd_keyvault.h"

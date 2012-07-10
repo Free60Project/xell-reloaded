@@ -11,11 +11,11 @@
 
 #include <string.h>
 #include <xenon_nand/xenon_sfcx.h>
+#include <crypt/hmac_sha1.h>
+#include <crypt/rc4.h>
+#include <xb360/xb360.h>
+#include <network/network.h>
 
-#include "network/network.h"
-#include "crypt/hmac_sha1.h"
-#include "crypt/rc4.h"
-#include "xb360/xb360.h"
 #include "httpd.h"
 #include "httpd_flash.h"
 

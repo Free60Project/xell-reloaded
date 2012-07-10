@@ -7,15 +7,15 @@
 
 //#include "lwip/debug.h"
 //#include "lwip/stats.h"
-#include "lwip/tcp.h"
+#include <lwip/tcp.h>
 
 #include <string.h>
 #include <xetypes.h>
 
-#include "network/network.h"
-#include "crypt/hmac_sha1.h"
-#include "crypt/rc4.h"
-#include "xb360/xb360.h"
+#include <network/network.h>
+#include <crypt/hmac_sha1.h>
+#include <crypt/rc4.h>
+#include <xb360/xb360.h>
 #include <xenon_soc/xenon_io.h>
 
 #include "httpd.h"
