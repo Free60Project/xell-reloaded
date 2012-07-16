@@ -43,9 +43,6 @@ static struct controller_data_s old_ctrl;
 /* network.h */
 extern struct netif netif;
 
-/* If filename includes ':' it's seen as valid mountname */
-#define LOAD_FILE(filename,type) {if(strrchr(filename,':')!= NULL)try_load_file(filename,type); else boot_tftp(boot_server_name(),filename,type);}
-
 char *strip(char *buf)
 {
 	while (*buf == ' ' || *buf == '\t')
@@ -69,6 +66,18 @@ void split(char *buf, char **left, char **right, char delim)
 		*left = strip(buf);
 		*right = NULL;
 	}
+}
+
+int kboot_loadfile(char *filename, int type)
+{
+	int ret;
+	/* If filename includes ':' it's seen as valid mountname */
+	if(strrchr(filename,':')!= NULL)
+		ret = try_load_file(filename,type);
+	else
+		ret = boot_tftp(boot_server_name(),filename,type);
+		
+	return ret;
 }
 
 void kboot_set_config(void)
@@ -432,13 +441,13 @@ printf("\nTimeout.\n");
 return defaultchoice;
 }
 
-void try_kbootconf(void * addr, unsigned len){
-    
+int try_kbootconf(void * addr, unsigned len){
+    int ret;
     if (len > MAX_KBOOTCONF_SIZE)
     {
-        PRINT_ERR("file is bigger than %u bytes\n",len);
+        PRINT_ERR("file is bigger than %u bytes\n",MAX_KBOOTCONF_SIZE);
         PRINT_ERR("Aborting\n");
-        return;
+        return -1;
     }
     
     memcpy(conf_buf,addr,len);
@@ -449,7 +458,7 @@ void try_kbootconf(void * addr, unsigned len){
     
     if (conf.num_kernels == 0){
        PRINT_WARN("No kernels found in kboot.conf !\n");
-       return;
+       return -1;
     }
     
     int i;
@@ -463,7 +472,7 @@ void try_kbootconf(void * addr, unsigned len){
     if (boot_entry < 0)
     {
         printf("\rAborted by user!\n");
-        return;
+        return boot_entry;
     }
     printf("\nYou chose: %i\n",boot_entry);
     
@@ -474,16 +483,26 @@ void try_kbootconf(void * addr, unsigned len){
         
     if (conf.kernels[boot_entry].initrd)
     {
-        printf("Loading initrd ...\n");
-        LOAD_FILE(conf.kernels[boot_entry].initrd,TYPE_INITRD);
-     }
+        printf("Loading initrd ... ");
+        ret = kboot_loadfile(conf.kernels[boot_entry].initrd,TYPE_INITRD);
+        if (ret < 0) {
+			printf("Failed!\nAborting!\n");
+			return -1;
+		}
+		else
+			printf("OK!\n");
+    }
 
-     printf("Loading kernel ...\n");
-     LOAD_FILE(conf.kernels[boot_entry].kernel,TYPE_ELF);
+    printf("Loading kernel ...\n");
+    ret = kboot_loadfile(conf.kernels[boot_entry].kernel,TYPE_ELF);
+    if (ret < 0)
+		printf("Failed!\n");
                 
     memset(conf_buf,0,MAX_KBOOTCONF_SIZE);
     conf.num_kernels = 0;
     conf.timeout = 0;
     conf.default_idx = 0;
     conf.speedup = 0;
+    
+    return ret;
 }

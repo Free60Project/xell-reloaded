@@ -265,6 +265,7 @@ int do_tftp(void *target, int maxlen, struct ip_addr server, const char *file)
 
 int boot_tftp(const char *server_addr, const char *tftp_bootfile, int filetype)
 {
+	int ret;
 	char *args = strchr(tftp_bootfile, ' ');
 	if (args)
 		*args++ = 0;
@@ -302,10 +303,10 @@ int boot_tftp(const char *server_addr, const char *tftp_bootfile, int filetype)
 		return res;
 	}
 	
-	launch_file(elf_raw,res,filetype);
+	ret = launch_file(elf_raw,res,filetype);
 	
 	free(elf_raw);
-	return 0;
+	return ret;
 }
 
 extern int boot_tftp_url(const char *url)

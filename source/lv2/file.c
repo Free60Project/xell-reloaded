@@ -117,57 +117,60 @@ void wait_and_cleanup_line()
 	printf("\r%s\r",sp);
 }
 
-void launch_file(void * addr, unsigned len, int filetype){
-        unsigned char * gzip_file;
-        switch (filetype){
+int launch_file(void * addr, unsigned len, int filetype){
+	int ret;
+	unsigned char * gzip_file;
+    switch (filetype){
             
-            case TYPE_ELF:
-                // check if addr point to a gzip file
-                gzip_file = (unsigned char *)addr;
-                if((gzip_file[0]==0x1F)&&(gzip_file[1]==0x8B)){
-                        //found a gzip file
-                        printf(" * Found a gzip file...\n");
-                        char * dest = malloc(ELF_MAXSIZE);
-                        int destsize = 0;
-                        if(inflate_read((char*)addr, len, &dest, &destsize, 1) == 0){
-                                //relocate elf ...
-                                memcpy(addr,dest,destsize);
-                                printf(" * Successfully unpacked...\n");
-                                free(dest);
-                                len=destsize;
-                        }
-                        else{
-                                printf(" * Unpacking failed...\n");
-                                free(dest);
-                                return;
-                        }
+		case TYPE_ELF:
+			// check if addr point to a gzip file
+            gzip_file = (unsigned char *)addr;
+            if((gzip_file[0]==0x1F)&&(gzip_file[1]==0x8B)){
+				//found a gzip file
+                printf(" * Found a gzip file...\n");
+                char * dest = malloc(ELF_MAXSIZE);
+                int destsize = 0;
+                if(inflate_read((char*)addr, len, &dest, &destsize, 1) == 0){
+					//relocate elf ...
+                    memcpy(addr,dest,destsize);
+                    printf(" * Successfully unpacked...\n");
+                    free(dest);
+                    len=destsize;
                 }
-                if (memcmp(addr, elfhdr, 4))
-                    return;
-                printf(" * Launching ELF...\n");
-                elf_runWithDeviceTree(addr,len,dt_blob_start,dt_blob_end-dt_blob_start);
-                break;
-            case TYPE_INITRD:
-                printf(" * Loading initrd into memory ...\n");
-                kernel_prepare_initrd(addr,len);
-                break;
-            case TYPE_KBOOT:
-                printf(" * Loading kboot.conf ...\n");
-                try_kbootconf(addr,len);
-                break;
-            case TYPE_UPDXELL:
-                if (memcmp(addr + XELL_FOOTER_OFFSET, XELL_FOOTER, XELL_FOOTER_LENGTH) || len != XELL_SIZE)
-                    return;
-                printf(" * Loading UpdXeLL binary...\n");
-                updateXeLL(addr,len);
-                break;
-            default:
-                printf("! Unsupported filetype supplied!\n");
-        }
+                else {
+					printf(" * Unpacking failed...\n");
+                    free(dest);
+                    return -1;
+                }
+			}
+            if (memcmp(addr, elfhdr, 4))
+				return -1;
+            printf(" * Launching ELF...\n");
+            ret = elf_runWithDeviceTree(addr,len,dt_blob_start,dt_blob_end-dt_blob_start);
+            break;
+		case TYPE_INITRD:
+			printf(" * Loading initrd into memory ...\n");
+            ret = kernel_prepare_initrd(addr,len);
+            break;
+        case TYPE_KBOOT:
+			printf(" * Loading kboot.conf ...\n");
+            ret = try_kbootconf(addr,len);
+            break;
+        case TYPE_UPDXELL:
+			if (memcmp(addr + XELL_FOOTER_OFFSET, XELL_FOOTER, XELL_FOOTER_LENGTH) || len != XELL_SIZE)
+				return -1;
+            printf(" * Loading UpdXeLL binary...\n");
+            ret = updateXeLL(addr,len);
+            break;
+		default:
+			printf("! Unsupported filetype supplied!\n");
+	}
+	return ret;
 }
 
 int try_load_file(char *filename, int filetype)
 {
+	int ret;
 	if(filetype == TYPE_NANDIMAGE){
 		try_rawflash(filename);
 		return -1;
@@ -197,10 +200,10 @@ int try_load_file(char *filename, int filetype)
 		return r;
 	}
 
-	launch_file(buf,r,filetype);
+	ret = launch_file(buf,r,filetype);
 
 	free(buf);
-	return 0;
+	return ret;
 }
 
 void fileloop() {
