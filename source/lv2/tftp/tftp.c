@@ -305,7 +305,9 @@ int boot_tftp(const char *server_addr, const char *tftp_bootfile, int filetype)
 	}
 	
 	if (filetype == TYPE_ELF) {
-		char * argv[] = {"xell", tftp_bootfile};
+		char * argv[] = {
+			tftp_bootfile,
+		};
 		int argc = sizeof (argv) / sizeof (char *);
 		
 		elf_setArgcArgv(argc, argv);

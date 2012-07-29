@@ -201,7 +201,9 @@ int try_load_file(char *filename, int filetype)
 	}
 	
 	if (filetype == TYPE_ELF) {
-		char * argv[] = {"xell", filename};
+		char * argv[] = {
+			filename,
+		};
 		int argc = sizeof (argv) / sizeof (char *);
 		
 		elf_setArgcArgv(argc, argv);
