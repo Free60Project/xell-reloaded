@@ -199,7 +199,14 @@ int try_load_file(char *filename, int filetype)
 		free(buf);
 		return r;
 	}
-
+	
+	if (filetype == TYPE_ELF) {
+		char * argv[] = {"xell", filename};
+		int argc = sizeof (argv) / sizeof (char *);
+		
+		elf_setArgcArgv(argc, argv);
+	}
+	
 	ret = launch_file(buf,r,filetype);
 
 	free(buf);

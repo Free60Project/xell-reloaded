@@ -16,6 +16,7 @@
 
 #include <ppc/timebase.h>
 #include <network/network.h>
+#include <elf/elf.h>
 #include "config.h"
 #include "file.h"
 
@@ -301,6 +302,13 @@ int boot_tftp(const char *server_addr, const char *tftp_bootfile, int filetype)
 	if (res < 0){
 		free(elf_raw);
 		return res;
+	}
+	
+	if (filetype == TYPE_ELF) {
+		char * argv[] = {"xell", tftp_bootfile};
+		int argc = sizeof (argv) / sizeof (char *);
+		
+		elf_setArgcArgv(argc, argv);
 	}
 	
 	ret = launch_file(elf_raw,res,filetype);
