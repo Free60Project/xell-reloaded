@@ -9,7 +9,7 @@ LV1_DIR=source/lv1
 
 # Configuration
 CFLAGS = -Wall -Os -I$(LV1_DIR) -ffunction-sections -fdata-sections \
-	-m64 -mno-toc -DBYTE_ORDER=BIG_ENDIAN -mno-altivec -D$(CURRENT_TARGET)
+	-m64 -mno-toc -DBYTE_ORDER=BIG_ENDIAN -mno-altivec -D$(CURRENT_TARGET) $(CYGNOS_DEF)
 
 AFLAGS = -Iinclude -m64
 LDFLAGS = -nostdlib -n -m64 -Wl,--gc-sections
@@ -23,7 +23,7 @@ OBJS =	$(LV1_DIR)/startup.o \
 	$(LV1_DIR)/vsprintf.o \
 	$(LV1_DIR)/puff/puff.o
 
-TARGETS = xell-1f xell-2f xell-gggggg
+TARGETS = xell-1f xell-2f xell-gggggg xell-gggggg_cygnos_demon xell-1f_cygnos_demon xell-2f_cygnos_demon
 
 # Build rules
 all: $(foreach name,$(TARGETS),$(addprefix $(name).,build))
@@ -49,6 +49,11 @@ clean:
 
 xell-gggggg.elf: CURRENT_TARGET = HACK_GGGGGG
 xell-1f.elf xell-2f.elf: CURRENT_TARGET = HACK_JTAG
+
+xell-gggggg_cygnos_demon.elf: CURRENT_TARGET = HACK_GGGGGG
+xell-gggggg_cygnos_demon.elf: CYGNOS_DEF = -DCYGNOS
+xell-1f_cygnos_demon.elf xell-2f_cygnos_demon.elf: CURRENT_TARGET = HACK_JTAG
+xell-1f_cygnos_demon.elf xell-2f_cygnos_demon.elf: CYGNOS_DEF = -DCYGNOS
 
 %.elf: $(LV1_DIR)/%.lds $(OBJS)
 	@$(CC) -n -T $< $(LDFLAGS) -o $@ $(OBJS)
