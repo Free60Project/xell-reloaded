@@ -80,7 +80,6 @@ int main(){
 	*(volatile uint32_t*)0xea00105c = 0xc000000;
 
 	xenon_smc_start_bootanim();
-	xenon_smc_set_power_led(0, 0, 1);
 
 	// flush console after each outputted char
 	setbuf(stdout,NULL);
