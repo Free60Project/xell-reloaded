@@ -7,7 +7,8 @@ enum {
     TYPE_INITRD,
     TYPE_KBOOT,
     TYPE_NANDIMAGE,
-    TYPE_UPDXELL
+    TYPE_UPDXELL,
+    TYPE_READTXT
 };
 
 
@@ -18,7 +19,7 @@ struct filenames {
 
 int inflate_read(char *source,int len,char **dest,int * destsize, int gzip);
 void wait_and_cleanup_line();
-int launch_file(void * addr, unsigned len, int filetype);
+void launch_elf(void * addr, unsigned len, int filetype);
 int try_load_file(char *filename, int filetype);
 void fileloop();
-void tftp_loop();
+

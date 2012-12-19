@@ -12,7 +12,7 @@
 
 #include "config.h"
 
-#ifdef FS_FAT 
+#ifdef FS_FAT
 #include <libfat/fat.h>
 #endif
 #ifdef FS_EXT2FS
@@ -142,12 +142,13 @@ typedef struct {
 	DISC_INTERFACE* interface;
 	sec_t sector;
 } DEVICE_STRUCT;
-
-//#define DEBUG_MOUNTALL
+extern char temptxt[2048];
+extern char *tmptxt;
+#define DEBUG_MOUNTALL
 
 #ifdef DEBUG_MOUNTALL
 #define debug_printf(fmt, args...) \
-        fprintf(stderr, "%s:%d:" fmt, __FUNCTION__, __LINE__, ##args)
+        tmptxt += sprintf(tmptxt,"%s:%d:" fmt, __FUNCTION__, __LINE__, ##args)
 #else
 #define debug_printf(fmt, args...)
 #endif
@@ -175,7 +176,7 @@ static void AddPartition(sec_t sector, int device, int type, int *devnum) {
 
 	if (device == DEVICE_USB)
 		disc = (DISC_INTERFACE *) & usb2mass_ops;
-	
+
 	else if(device == DEVICE_ATAPI)
 		disc = (DISC_INTERFACE *) & xenon_atapi_ops;
 
@@ -184,7 +185,7 @@ static void AddPartition(sec_t sector, int device, int type, int *devnum) {
 	char *name;
 
 	switch (type) {
-            
+
 #ifdef FS_FAT
 		case T_FAT:
 			if (!fatMount(mount, disc, sector, 2, 64))
@@ -259,8 +260,8 @@ static int FindPartitions(int device) {
 	}
 
 	DISC_INTERFACE *interface;
-	
-	switch(device){		
+
+	switch(device){
 		case DEVICE_ATAPI:
 			interface = (DISC_INTERFACE *) & xenon_atapi_ops;
 			break;
@@ -271,7 +272,7 @@ static int FindPartitions(int device) {
 			interface = (DISC_INTERFACE *) & usb2mass_ops;
 			break;
 	}
-		
+
 
 	MASTER_BOOT_RECORD mbr;
 	PARTITION_RECORD *partition = NULL;
@@ -508,13 +509,15 @@ static void UnmountPartitions(int device) {
 /**
  * Parse mbr for filesystem
  */
+void mount_usb_devices() {
+	FindPartitions(DEVICE_USB);}
 void mount_all_devices() {
 	FindPartitions(DEVICE_USB);
-	
+
 	if (xenon_atapi_ops.isInserted()) {
 		FindPartitions(DEVICE_ATAPI);
 	}
-	
+
 	if (xenon_ata_ops.isInserted()) {
 #ifdef FS_XTAF
 		if (XTAFMount() == 0)
@@ -534,8 +537,7 @@ void findDevices() {
 		if (devoptab_list[i]->structSize) {
 			//strcpy(device_list[device_list_size],devoptab_list[i]->name);
 			sprintf(device_list[device_list_size], "%s:/", devoptab_list[i]->name);
-			printf("Found: %s\r\n", device_list[device_list_size]);
-			
+			sprintf(tmptxt,"Found: %s\r\n", device_list[device_list_size]);
 			device_list_size++;
 		}
 	}

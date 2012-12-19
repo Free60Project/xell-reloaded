@@ -46,9 +46,9 @@ static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_
 	{
 		tftp_state = TFTP_STATE_FINISH;
 		tftp_result = -1;
-	}	
+	}
 	start=mftb();
-	
+
 	switch ((d[0] << 8) | d[1])
 	{
 	case 3: // DATA
@@ -60,7 +60,7 @@ static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_
 			if ((ptr + pl) <= image_maxlen)
 				memcpy(base + ptr, d + 4, pl);
 			current_block++;
-			
+
 			if (!(current_block & 255))
 				printf("%c                                                                       \r", "|/-\\"[(current_block>>8)&3]);
 
@@ -89,18 +89,18 @@ static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_
 		//printf("TFTP got ERROR\n");
 		tftp_state = TFTP_STATE_FINISH;
 			/* please don't overflow this. */
-		printf("tftp error %d: %s", (d[2] << 8) | d[3], d + 4);
+		printf("tftp  %d: %s", (d[2] << 8) | d[3], d + 4);
 		tftp_result = -2;
 		break;
 	}
-	
+
 	if (tftp_state == TFTP_STATE_RRQ_SEND)
 	{
 		udp_connect(pcb, addr, port);
 		ts=mftb();
 		tftp_state = TFTP_STATE_ACK_SEND;
 	}
-	
+
 	tries = 0;
 	pbuf_free(p);
 }
@@ -114,14 +114,14 @@ int send_ack(struct udp_pcb *pcb)
 					printf("internal error: out of memory!\n");
 					return -1;
 				}
-				
+
 				unsigned char *d = p->payload;
-				
+
 				*d++ = 0;
 				*d++ = TFTP_OPCODE_ACK;
 				*d++ = current_block >> 8;
 				*d++ = current_block & 0xFF;
-				
+
 				if (udp_send(pcb, p))
 				{
 					printf("TFTP: packet send error.");
@@ -129,39 +129,39 @@ int send_ack(struct udp_pcb *pcb)
 					return -1;
 				}
 				pbuf_free(p);
-				
+
 
 				return 0;
 }
 
 int do_tftp(void *target, int maxlen, struct ip_addr server, const char *file)
 {
-/*	printf("TFTP boot from %u.%u.%u.%u:%s\n", 
+/*	printf("TFTP boot from %u.%u.%u.%u:%s\n",
 		ip4_addr1(&server), ip4_addr2(&server), ip4_addr3(&server), ip4_addr4(&server),
 		file);*/
-	
+
 	base = (unsigned char*)target;
 	image_maxlen = maxlen;
-	
+
 	struct udp_pcb *pcb = udp_new();
 	if (!pcb)
 	{
 		printf("internal error: out of memory (udp)\n");
 		return -1;
 	}
-	
+
 	udp_bind(pcb, IP_ADDR_ANY, htons(0x1234));
 	udp_recv(pcb, tftp_recv, 0);
-	
+
 	tftp_state = TFTP_STATE_RRQ_SEND;
 	current_block = 0;
 	last_size = 512;//Last size has to be 512 or greater - this should fix files smaller than 1 DATA packet
 	ptr = 0;
-	
+
 	start=mftb();
-	
+
 	send = 1;
-	
+
 	maxtries = 1;
 	tries = 0;
 
@@ -210,16 +210,16 @@ int do_tftp(void *target, int maxlen, struct ip_addr server, const char *file)
 					printf("internal error: out of memory! (couldn't allocate %d bytes)\n", (int)(2 + strlen(file) + 1 + 6));
 					break;
 				}
-				
+
 				unsigned char *d = p->payload;
-				
+
 				*d++ = 0;
 				*d++ = TFTP_OPCODE_RRQ;
 				strcpy((char*)d, file);
 				d += strlen(file) + 1;
 				strcpy((char*)d, "octet");
 				d += 6;
-				
+
 				if (udp_sendto(pcb, p, &server, 69))
 					printf("TFTP: packet send error.");
 				pbuf_free(p);
@@ -242,7 +242,7 @@ int do_tftp(void *target, int maxlen, struct ip_addr server, const char *file)
 		}
 		network_poll();
 	}
-	
+
 	//printf("tftp result: %d\n", tftp_result);
 	if (!tftp_result)
 	{
@@ -254,12 +254,12 @@ int do_tftp(void *target, int maxlen, struct ip_addr server, const char *file)
 		uint64_t end;
 		end=mftb();
 		printf("%d packets (%d bytes, %d packet size), received in %dms, %d kb/s\n",
-			current_block, ptr, last_size, (int)tb_diff_msec(end, ts), 
+			current_block, ptr, last_size, (int)tb_diff_msec(end, ts),
 			(int)(ptr / 1024 * 1000 / tb_diff_msec(end, ts)));
 	}
-		
+
 	udp_remove(pcb);
-	
+
 	return (tftp_result < 0) ? tftp_result : ptr;
 }
 
@@ -272,7 +272,7 @@ int boot_tftp(const char *server_addr, const char *tftp_bootfile, int filetype)
 		*args++ = 0;
 
 	//const char *msg = " was specified, neither manually nor via dhcp. aborting tftp.\n";
-	
+
 	ip_addr_t server_address;
 	//printf(server_addr);
 	if (!ipaddr_aton(server_addr, &server_address))
@@ -280,14 +280,14 @@ int boot_tftp(const char *server_addr, const char *tftp_bootfile, int filetype)
 		printf("no server address given");
 		server_address.addr = 0;
 	}
-	
+
 	if (!server_address.addr)
 	{
 		printf("no tftp server address");
 		//printf(msg);
 		return -1;
 	}
-	
+
 	if (!(tftp_bootfile && *tftp_bootfile))
 	{
 		printf("no tftp bootfile name");
@@ -295,26 +295,26 @@ int boot_tftp(const char *server_addr, const char *tftp_bootfile, int filetype)
 		return -1;
 	}
 	//printf(" * loading tftp bootfile '%s:%s'\n", server_addr, tftp_bootfile);
-	
+
 	void * elf_raw=malloc(ELF_MAXSIZE);
-	
+
 	int res = do_tftp(elf_raw, ELF_MAXSIZE, server_address, tftp_bootfile);
 	if (res < 0){
 		free(elf_raw);
 		return res;
 	}
-	
+
 	if (filetype == TYPE_ELF) {
 		char * argv[] = {
 			tftp_bootfile,
 		};
 		int argc = sizeof (argv) / sizeof (char *);
-		
+
 		elf_setArgcArgv(argc, argv);
 	}
-	
+
 	ret = launch_file(elf_raw,res,filetype);
-	
+
 	free(elf_raw);
 	return ret;
 }
@@ -322,18 +322,18 @@ int boot_tftp(const char *server_addr, const char *tftp_bootfile, int filetype)
 extern int boot_tftp_url(const char *url)
 {
 	const char *bootfile = url;
-	
+
 	char server_addr[20];
-	
+
 	if (!bootfile)
 		bootfile = "";
-	
+
 	// ip:/path
 	// /path
 	// ip
-	
+
 	const char *r = strchr(bootfile, ':');
-	
+
 	if (r)
 	{
 		int l = r - bootfile;
@@ -347,22 +347,25 @@ extern int boot_tftp_url(const char *url)
 		*server_addr = 0;
 		bootfile = url;
 	}
-	
+
 	return boot_tftp(server_addr, bootfile, TYPE_ELF);
 }
 
 char *boot_server_name()
-{       
+{
 	if (kboot_tftp && kboot_tftp[0])
 		return kboot_tftp;
-            
+
 	if (netif.dhcp && netif.dhcp->boot_server_name[0])
     	return netif.dhcp->boot_server_name;
-	
+    	return "192.168.2.2";
+
 	if (netif.dhcp && netif.dhcp->offered_si_addr.addr)
     	return ipaddr_ntoa(&netif.dhcp->offered_si_addr);
+    	return "192.168.2.2";
 
 	return "192.168.1.98";
+
 }
 
 char *boot_file_name()
@@ -370,5 +373,5 @@ char *boot_file_name()
 	if (netif.dhcp && *netif.dhcp->boot_file_name)
 		return netif.dhcp->boot_file_name;
 
-	return "/tftpboot/xenon";
+	return "/xenon.elf";
 }
