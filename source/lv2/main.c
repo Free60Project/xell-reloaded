@@ -105,7 +105,7 @@ int main(){
 	
 	xenon_sound_init();
 
-	if (xenon_get_console_type != REV_CORONA_PHISON) //Not needed for MMC type of consoles! ;)
+	if (xenon_get_console_type() != REV_CORONA_PHISON) //Not needed for MMC type of consoles! ;)
 	{
 		printf(" * nand init\n");
 		sfcx_init();
