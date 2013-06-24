@@ -103,14 +103,18 @@ int main(){
 	
 	xenon_sound_init();
 
-	printf(" * nand init\n");
-	sfcx_init();
-	if (sfc.initialized != SFCX_INITIALIZED)
+	if (xenon_get_console_type != REV_CORONA_PHISON) //Not needed for MMC type of consoles! ;)
 	{
-		printf(" ! sfcx initialization failure\n");
-		printf(" ! nand related features will not be available\n");
-		delay(5);
+		printf(" * nand init\n");
+		sfcx_init();
+		if (sfc.initialized != SFCX_INITIALIZED)
+		{
+			printf(" ! sfcx initialization failure\n");
+			printf(" ! nand related features will not be available\n");
+			delay(5);
+		}
 	}
+
 	xenon_config_init();
 
 	printf(" * network init\n");
