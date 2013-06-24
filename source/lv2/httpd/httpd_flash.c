@@ -15,6 +15,7 @@
 #include <crypt/rc4.h>
 #include <xb360/xb360.h>
 #include <network/network.h>
+#include <stdio.h>
 
 #include "httpd.h"
 #include "httpd_flash.h"
@@ -28,7 +29,7 @@ struct response_flash_priv_s
 
 extern struct sfc sfc;
 
-unsigned char buffer[0x4200]; //we only use a page (0x210)
+#define MMC_BUF_SIZE 0x4000
 
 int response_flash_process_request(struct http_state *http, const char *method, const char *url)
 {
@@ -43,15 +44,21 @@ int response_flash_process_request(struct http_state *http, const char *method, 
 		return 0;
 	struct response_flash_priv_s *priv = http->response_priv;
 
-	int pages = sfc.size_pages;
-	if(pages == 0 ){
-		priv->hdr_state = HTTPD_SERVER_CLOSE;
-		priv->page = 0;
-		priv->pages = 0;
-		priv->togo = 0;
-		http->code = 500;
-		return 0; //TODO Set Internal Server Error??
+	int pages = 0;
+	if (sfc.initialized == SFCX_INITIALIZED)
+	{
+		pages = sfc.size_pages;
+		if(pages == 0 ){
+			priv->hdr_state = HTTPD_SERVER_CLOSE;
+			priv->page = 0;
+			priv->pages = 0;
+			priv->togo = 0;
+			http->code = 500;
+			return 0; //TODO Set Internal Server Error??
+		}
 	}
+	else	
+		pages = MMC_FLASH_SIZE / MMC_BUF_SIZE;	
 
 	priv->hdr_state = 0;
 	priv->page = 0; 							//Current Page Number
@@ -76,7 +83,10 @@ int response_flash_do_header(struct http_state *http)
 		break;
 	case 1:
 		t = "Content-Length";
-		sprintf(buf, "%d", priv->pages * sfc.page_sz_phys);
+		if (sfc.initialized == SFCX_INITIALIZED)
+			sprintf(buf, "%d", priv->pages * sfc.page_sz_phys);
+		else
+			sprintf(buf, "%d", priv->pages * MMC_BUF_SIZE);
 		o = buf;
 		break;
 	//case 2:
@@ -121,22 +131,46 @@ int response_flash_do_data(struct http_state *http)
 		return 1;
 	}
 
-	while (av >= sfc.page_sz_phys)
+	if (sfc.initialized == SFCX_INITIALIZED)
 	{
-		//int maxread = sfc.page_sz_phys;
-		//if (maxread > av)
-		//	maxread = av;
+		unsigned char buffer[sfc.page_sz];
+		while (av >= sfc.page_sz_phys)
+		{
+			//int maxread = sfc.page_sz_phys;
+			//if (maxread > av)
+			//	maxread = av;
 
-		sfcx_read_page(buffer, priv->page * sfc.page_sz, 1);
-		httpd_put_sendbuffer(http, (void*)buffer, sfc.page_sz_phys);
+			sfcx_read_page(buffer, priv->page * sfc.page_sz, 1);
+			httpd_put_sendbuffer(http, (void*)buffer, sfc.page_sz_phys);
 
-		priv->page++;
-		priv->togo--;
-		av -= sfc.page_sz_phys;
+			priv->page++;
+			priv->togo--;
+			av -= sfc.page_sz_phys;
 
-		if (priv->togo <= 0){
-			//advance to next stage (close connection)
-			return 0;
+			if (priv->togo <= 0)
+			{
+					//advance to next stage (close connection)
+					return 0;
+			}
+		}
+	}
+	else
+	{
+		unsigned char buffer[MMC_BUF_SIZE];
+		while (av >= MMC_BUF_SIZE)
+		{
+			xenon_get_logical_nand_data(&buffer, priv->page * MMC_BUF_SIZE, MMC_BUF_SIZE);
+			httpd_put_sendbuffer(http, (void*)buffer, MMC_BUF_SIZE);
+
+			priv->page++;
+			priv->togo--;
+			av -= MMC_BUF_SIZE;
+
+			if (priv->togo <= 0)
+			{
+				//advance to next stage (close connection)
+				return 0;
+			}
 		}
 	}
 	return 1;
