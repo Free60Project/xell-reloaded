@@ -17,6 +17,8 @@
 #include "httpd.h"
 #include "httpd_index.h"
 
+int rawBlockMode = 0;
+
 struct response_mem_priv_s
 {
 	void *base;
@@ -33,42 +35,45 @@ int response_keyvault2_process_request(struct http_state *http, const char *meth
 	if (strcmp(method, "GET"))
 		return 0;
 
-	if (strcmp(url, "/KVRAW"))
+	if (strcmp(url, "/KVRAW") && strcmp(url, "/KVRAW2"))
 		return 0;
+	if (!(strcmp(url, "/KVRAW2")))
+		rawBlockMode = 1;
 
 	http->response_priv = mem_malloc(sizeof(struct response_mem_priv_s));
 	if (!http->response_priv)
 		return 0;
 	struct response_mem_priv_s *priv = http->response_priv;
 
-	int bytes_sz = 0x4200;
+	int bytes_sz = (KV_FLASH_SIZE / sfc.page_sz) * sfc.page_sz_phys;
 
 	//priv->base = (void*) 0x80000200c8000000ULL;
-	priv->base = (void*) mem_malloc(bytes_sz);
+	if (sfc.initialized == SFCX_INITIALIZED && !rawBlockMode)
+		priv->base = (void*) mem_malloc(bytes_sz);
+	else
+		priv->base = (void*) mem_malloc(KV_FLASH_SIZE);
 
 	if (priv->base == NULL) {
 		printf("keyvault2: Out of memory\n");
 		return 0;
 	}
 
-	if(kv_read(priv->base,0)!=0)
-	 if(kv_read(priv->base,1)!=0){ // Try decrypt with virtual cpukey 
-		priv->hdr_state = HTTPD_SERVER_CLOSE;
-		priv->ptr = 0;
-		http->code = 500;
-		http->code_ex = HTTPD_ERR_KV_READ;
-		return 0; //TODO Set Internal Server Error??
-	}
-
-	int i = 0;
-	for (i = 0; i < (bytes_sz / 0x210); i++)
+	
+	if (sfc.initialized == SFCX_INITIALIZED && !rawBlockMode)
 	{
-		sfcx_read_page(priv->base + (i * 0x210), 0x4000 + (i * 0x200), 1);
+		int i = 0;
+		for (i = 0; i < (bytes_sz / sfc.page_sz_phys); i++)		
+			sfcx_read_page(priv->base + (i * sfc.page_sz_phys), KV_FLASH_SIZE + (i * sfc.page_sz), 1);		
 	}
+	else
+		xenon_get_logical_nand_data(priv->base, KV_FLASH_OFFSET, KV_FLASH_SIZE);
 
 	priv->hdr_state = 0;
 	priv->ptr = 0;
-	priv->len = bytes_sz;
+	if (sfc.initialized == SFCX_INITIALIZED && !rawBlockMode)
+		priv->len = bytes_sz;
+	else
+		priv->len = KV_FLASH_SIZE;
 	priv->togo = priv->len;
 	priv->filename="keyvault_raw.bin";
 	http->code = 200;
@@ -99,7 +104,6 @@ int response_keyvault2_do_header(struct http_state *http)
 		break;
 	case 3:
 		t = "Content-Disposition";
-		//TODO Detect Dev/Ret and also Version Num, Make part of Filename
 		sprintf(buf,"attachment; filename=%s",priv->filename);
 		o = buf;
 		break;
@@ -137,7 +141,7 @@ int response_keyvault2_do_data(struct http_state *http)
 
 	while (av)
 	{
-		int maxread = 0x210;
+		int maxread = priv->len;
 		if (maxread > av)
 			maxread = av;
 
@@ -153,7 +157,6 @@ int response_keyvault2_do_data(struct http_state *http)
 			return 0;
 		}
 	}
-
 	return 1;
 }
 
