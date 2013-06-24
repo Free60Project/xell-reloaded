@@ -85,7 +85,10 @@ int main(){
 	setbuf(stdout,NULL);
 
 	xenos_init(VIDEO_MODE_AUTO);
-#ifdef DEFAULT_THEME
+
+#ifdef SWIZZY_THEME
+	console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_ORANGE); // Orange text on black bg
+#elif defined DEFAULT_THEME
 	console_set_colors(CONSOLE_COLOR_BLUE,CONSOLE_COLOR_WHITE); // White text on blue bg
 #else
 	console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_GREEN); // Green text on black bg
