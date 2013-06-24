@@ -43,7 +43,7 @@ int response_keyvault_process_request(struct http_state *http, const char *metho
 		return 0;
 	struct response_mem_priv_s *priv = http->response_priv;
 
-	int bytes_sz = 0x4000;
+	int bytes_sz = KV_FLASH_SIZE;
 
 	//priv->base = (void*) 0x80000200c8000000ULL;
 	priv->base = (void*) mem_malloc(bytes_sz);
