@@ -101,20 +101,11 @@ int inflate_read(char *source,int len,char **dest,int * destsize, int gzip) {
 
 void wait_and_cleanup_line()
 {
-	unsigned int w=0;
-	console_get_dimensions(&w,NULL);
-	
-	char sp[w];
-
-	memset(sp,' ',w);
-	sp[w-1]='\0';
-
 	uint64_t t=mftb();
 	while(tb_diff_msec(mftb(),t)<200){ // yield to network
 		network_poll();
 	}
-	
-	printf("\r%s\r",sp);
+	console_clrline();
 }
 
 int launch_file(void * addr, unsigned len, int filetype){
