@@ -57,7 +57,7 @@ void synchronize_timebases()
 {
 	xenon_thread_startup();
 	
-	std(0x200611a0,0); // stop timebase
+	std((void*)0x200611a0,0); // stop timebase
 	
 	int i;
 	for(i=1;i<6;++i){
@@ -67,7 +67,7 @@ void synchronize_timebases()
 	
 	reset_timebase_task(); // don't forget thread 0
 			
-	std(0x200611a0,0x1ff); // restart timebase
+	std((void*)0x200611a0,0x1ff); // restart timebase
 }
 	
 int main(){
