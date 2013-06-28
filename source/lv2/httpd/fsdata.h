@@ -1,4 +1,4 @@
-static const unsigned char data_index_html[] = {
+static const char data_index_html[] = {
 "<html><head>"
 "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=9\"/>"
 "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=us-ascii\">"

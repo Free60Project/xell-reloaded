@@ -270,6 +270,8 @@ static int FindPartitions(int device) {
 		case DEVICE_USB:
 			interface = (DISC_INTERFACE *) & usb2mass_ops;
 			break;
+		default:
+			return -1;
 	}
 		
 
@@ -466,44 +468,44 @@ static int FindPartitions(int device) {
 	return devnum;
 }
 
-static void UnmountPartitions(int device) {
-	char mount[11];
-	int i;
-	for (i = 0; i < MAX_DEVICES; i++) {
-		switch (part[device][i].type) {
-#ifdef FS_FAT
-			case T_FAT:
-				part[device][i].type = 0;
-				sprintf(mount, "%s:", part[device][i].mount);
-				fatUnmount(mount);
-				break;
-#endif
-#ifdef FS_NTFS
-			case T_NTFS:
-				part[device][i].type = 0;
-				ntfsUnmount(part[device][i].mount, false);
-				break;
-#endif
-#ifdef FS_EXT2FS
-			case T_EXT2:
-				part[device][i].type = 0;
-				ext2Unmount(part[device][i].mount);
-				break;
-#endif
-#ifdef FS_ISO9660
-			case T_ISO9660:
-				part[device][i].type = 0;
-				sprintf(mount, "%s:", part[device][i].mount);
-				ISO9660_Unmount(mount);
-				break;
-#endif
-		}
-		part[device][i].name[0] = 0;
-		part[device][i].mount[0] = 0;
-		part[device][i].sector = 0;
-		part[device][i].interface = NULL;
-	}
-}
+//static void UnmountPartitions(int device) {
+//	char mount[11];
+//	int i;
+//	for (i = 0; i < MAX_DEVICES; i++) {
+//		switch (part[device][i].type) {
+//#ifdef FS_FAT
+//			case T_FAT:
+//				part[device][i].type = 0;
+//				sprintf(mount, "%s:", part[device][i].mount);
+//				fatUnmount(mount);
+//				break;
+//#endif
+//#ifdef FS_NTFS
+//			case T_NTFS:
+//				part[device][i].type = 0;
+//				ntfsUnmount(part[device][i].mount, false);
+//				break;
+//#endif
+//#ifdef FS_EXT2FS
+//			case T_EXT2:
+//				part[device][i].type = 0;
+//				ext2Unmount(part[device][i].mount);
+//				break;
+//#endif
+//#ifdef FS_ISO9660
+//			case T_ISO9660:
+//				part[device][i].type = 0;
+//				sprintf(mount, "%s:", part[device][i].mount);
+//				ISO9660_Unmount(mount);
+//				break;
+//#endif
+//		}
+//		part[device][i].name[0] = 0;
+//		part[device][i].mount[0] = 0;
+//		part[device][i].sector = 0;
+//		part[device][i].interface = NULL;
+//	}
+//}
 
 /**
  * Parse mbr for filesystem

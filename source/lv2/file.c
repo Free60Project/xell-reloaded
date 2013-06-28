@@ -43,7 +43,7 @@ struct filenames filelist[] = {
     {"xenon.z",TYPE_ELF},
     {"vmlinux",TYPE_ELF},
     {"updflash.bin",TYPE_NANDIMAGE},
-    {NULL,NULL}
+    //{NULL, NULL} //Dunno why this is here? :S
 };
 //Decompress a gzip file ...
 int inflate_read(char *source,int len,char **dest,int * destsize, int gzip) {
@@ -109,7 +109,7 @@ void wait_and_cleanup_line()
 }
 
 int launch_file(void * addr, unsigned len, int filetype){
-	int ret;
+	int ret = 0;
 	unsigned char * gzip_file;
     switch (filetype){
             
