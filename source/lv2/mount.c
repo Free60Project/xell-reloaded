@@ -526,9 +526,9 @@ void mount_all_devices() {
 
 char * root_dev = NULL;
 static int device_list_size = 0;
-static char device_list[STD_MAX][10];
+char device_list[STD_MAX][10];
 
-void findDevices() {
+int findDevices(){
         int i;
 	for (i = 3; i < STD_MAX; i++) {
 		if (devoptab_list[i]->structSize) {
@@ -541,4 +541,5 @@ void findDevices() {
 	}
 
 	root_dev = device_list[0];
+	return device_list_size;
 }

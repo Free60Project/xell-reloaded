@@ -431,6 +431,17 @@ static void response_static_process_request(struct http_state *http, const char 
 	priv->len = strlen(priv->data);
 }
 
+static void response_static_process_request_fixed_len(struct http_state *http, const char *text, size_t len)
+{
+	http->response_priv = mem_malloc(sizeof(struct response_static_priv_s));
+	if (!http->response_priv)
+		return;
+	struct response_static_priv_s *priv = http->response_priv;
+	priv->data = text;
+	priv->ptr = 0;
+	priv->len = len;
+}
+
 static int response_static_do_data(struct http_state *http)
 {
 	struct response_static_priv_s *priv = http->response_priv;
@@ -792,6 +803,22 @@ static int response_err404_process_request(struct http_state *http, const char *
 	return 1;
 }
 
+static int response_log_process_request(struct http_state *http, const char *method, const char *url)
+{
+	if (strcmp(method, "GET"))
+		return 0;
+	if (strcmp(url, "/LOG"))
+		return 0;
+	extern char* vfs_console_buff;
+	extern size_t vfs_console_len;
+	http->code = 200;
+	if (vfs_console_len > 0)	
+		response_static_process_request_fixed_len(http, vfs_console_buff, vfs_console_len);
+	else
+		response_static_process_request(http, "Nothing logged...");
+	return 1;
+}
+
 struct httpd_handler http_handler[]=
 	{
 #ifdef UNIX
@@ -810,8 +837,12 @@ struct httpd_handler http_handler[]=
 		{response_keyvault_process_request, 0, 0, response_keyvault_do_header, response_keyvault_do_data, 0, response_keyvault_finish},
 		{response_keyvault2_process_request, 0, 0, response_keyvault2_do_header, response_keyvault2_do_data, 0, response_keyvault2_finish},
 //		{response_setdvdkey_process_request, 0, 0, response_setdvdkey_do_header, response_setdvdkey_do_data, response_setdvdkey_finish},
+		{response_log_process_request, 0, 0, 0, response_static_do_data, 0, response_static_finish},
 		{response_err400_process_request, 0, 0, 0, response_static_do_data, 0, response_static_finish},
+
+		//Should always be at the end!
 		{response_err404_process_request, 0, 0, 0, response_static_do_data, 0, response_static_finish}
+		
 	};
 
 #ifdef UNIX

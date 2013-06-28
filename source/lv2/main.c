@@ -33,6 +33,8 @@
 #include "file.h"
 #include "tftp/tftp.h"
 
+#include "log.h"
+
 void do_asciiart()
 {
 	char *p = asciiart;
@@ -69,6 +71,7 @@ void synchronize_timebases()
 }
 	
 int main(){
+	LogInit();
 	int i;
 
 	// linux needs this
@@ -137,9 +140,7 @@ int main(){
 	xenon_atapi_init();
 
 	mount_all_devices();
-
-	findDevices();
-
+	
 	/* display some cpu info */
 	printf(" * CPU PVR: %08x\n", mfspr(287));
 
@@ -161,6 +162,24 @@ int main(){
 	print_cpu_dvd_keys();
 	network_print_config();
 #endif
+	LogDeInit();
+
+	/* Search device for writing logfile */
+
+	int device_list_size = findDevices();
+	extern char device_list[STD_MAX][10];
+
+	for (i = 0; i < device_list_size; i++)
+        {
+                if (strncmp(device_list[i], "uda", 3) == 0)
+                {
+                        char tmp[STD_MAX + 8];
+                        sprintf(tmp, "%sxell.log", device_list[i]);
+                        if (LogWriteFile(tmp) == 0)
+                                i = device_list_size;
+                }
+        }
+
 	printf("\n * Looking for files on local media and TFTP...\n\n");
 	for(;;){
                 tftp_loop();

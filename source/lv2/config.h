@@ -23,7 +23,7 @@
 
 void mount_all_devices();
 
-void findDevices();
+int findDevices();
 
 #endif	/* CONFIG_H */
 
