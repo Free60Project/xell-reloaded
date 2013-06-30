@@ -171,7 +171,7 @@ int main(){
 
 	for (i = 0; i < device_list_size; i++)
         {
-                if (strncmp(device_list[i], "uda", 3) == 0)
+                if (strncmp(device_list[i], "ud", 2) == 0)
                 {
                         char tmp[STD_MAX + 8];
                         sprintf(tmp, "%sxell.log", device_list[i]);
