@@ -43,6 +43,17 @@ void do_asciiart()
 	printf(asciitail);
 }
 
+void dumpana() {
+	for (i = 0; i < 0x100; ++i)
+	{
+		uint32_t v;
+		xenon_smc_ana_read(i, &v);
+		printf("0x%08x, ",v);
+		if ((i&0x7)==0x7)
+			printf(" // %02x\n", i &~0x7);
+	}
+}
+
 char FUSES[350]; /* this string stores the ascii dump of the fuses */
 
 unsigned char stacks[6][0x10000];
@@ -75,6 +86,9 @@ int main(){
 	LogInit();
 	int i;
 
+	printf("ANA Dump before Init:\n");
+	dumpana();
+
 	// linux needs this
 	synchronize_timebases();
 	
@@ -89,6 +103,9 @@ int main(){
 	setbuf(stdout,NULL);
 
 	xenos_init(VIDEO_MODE_AUTO);
+
+	printf("ANA Dump after Init:\n");
+	dumpana();
 
 #ifdef SWIZZY_THEME
 	console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_ORANGE); // Orange text on black bg
