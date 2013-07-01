@@ -40,6 +40,7 @@ void do_asciiart()
 	char *p = asciiart;
 	while (*p)
 		console_putch(*p++);
+	printf(asciitail);
 }
 
 char FUSES[350]; /* this string stores the ascii dump of the fuses */
