@@ -21,4 +21,4 @@ static char* asciiart = "\n"
 	"  ßß   ßß      ß     ßßßßßßß    ßß     ßß   ßß   ßßß        ß      ßßß\n";
 static char* asciitail =
 	"             Free60.org XeLL - Xenon Linux Loader " VERSION "\n"
-	"						Special Corona XeLL version\n\n";
+	"                   Special Corona XeLL version\n\n";
