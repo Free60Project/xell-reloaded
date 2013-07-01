@@ -43,6 +43,7 @@ struct filenames filelist[] = {
     {"xenon.z",TYPE_ELF},
     {"vmlinux",TYPE_ELF},
     {"updflash.bin",TYPE_NANDIMAGE},
+	{" ", TYPE_ELF}
     //{NULL, NULL} //Dunno why this is here? :S
 };
 //Decompress a gzip file ...
@@ -217,7 +218,7 @@ void fileloop() {
                            try_load_file(filepath,filelist[j].filetype);
                            j++;
                            usb_do_poll();
-                        } while(filelist[j].filename != NULL);
+                        } while(strcmp(filelist[j].filename, " "));
                         j = 0;
                 }
         }
@@ -231,7 +232,7 @@ void tftp_loop() {
 	boot_tftp(boot_server_name(), filelist[i].filename, filelist[i].filetype);
         i++;
         network_poll();
-    } while(filelist[i].filename != NULL);
+    } while(strcmp(filelist[i].filename, " "));
     wait_and_cleanup_line();
     printf("Trying TFTP %s:%s... ",boot_server_name(),boot_file_name());
     /* Assume that bootfile delivered via DHCP is an ELF */
