@@ -44,13 +44,14 @@ void do_asciiart()
 }
 
 void dumpana() {
+	int i;
 	for (i = 0; i < 0x100; ++i)
 	{
 		uint32_t v;
 		xenon_smc_ana_read(i, &v);
-		printf("0x%08x, ",v);
+		printf("0x%08x, ", (unsigned int)v);
 		if ((i&0x7)==0x7)
-			printf(" // %02x\n", i &~0x7);
+			printf(" // %02x\n", (unsigned int)(i &~0x7));
 	}
 }
 
