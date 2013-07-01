@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static FILE * logfile = NULL;
 char * vfs_console_buff = NULL;
 size_t vfs_console_len = 0;
 extern void (*stdlog_hook)(const char *src, int len);
@@ -13,11 +12,6 @@ static void log_hook(const char *src, size_t len) {
 	if (DoLog) {
 		memcpy(&vfs_console_buff[vfs_console_len], src, len);
 		vfs_console_len += len;
-		if (logfile != NULL && fwrite(src, len, 1, logfile) <= 0)
-		{
-			printf(" ! logwrite error!\n");
-			DoLog = 0;
-		}
 	}
 }
 
@@ -40,22 +34,23 @@ void LogDeInit() {
 }
 
 int LogWriteFile(const char* logname) {
-	if (logfile != NULL)
-		fclose(logfile);
+	if (vfs_console_len <= 0)
+		return 0; //Nothing to write, let's treat it as success shall we?
 	printf("Attempting to open %s to save the log...\n", logname);
-	logfile = fopen(logname, "wb");
-	if (logfile != NULL && vfs_console_len > 0)
+	FILE * logfile = fopen(logname, "wb");
+	if (logfile != NULL)
 	{
 		if (fwrite(vfs_console_buff, sizeof(char), vfs_console_len, logfile) <= 0) {
 			printf(" ! logwrite error!\n");
 			return -2;
-		} else
+		} 
+		else
 			printf("Logfile written successfully!\n");
-			
-	fclose(logfile);
-	} else if (logfile == NULL){
+	} 
+	else {
 		printf("Device Read-Only?\n");
 		return -1;
-	}	
+	}
+	fclose(logfile);
 	return 0;
 }
