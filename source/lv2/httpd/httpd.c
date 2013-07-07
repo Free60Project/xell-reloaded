@@ -20,10 +20,8 @@
 #include "httpd_keyvault.h"
 #include "httpd_keyvault2.h"
 
-#ifndef HTTPD_VFS		
-#include "vfs.h"
 #include "httpd_index.h"
-#endif
+
 
 #define hdprintf(x...)
 // fprintf(stderr, x)
