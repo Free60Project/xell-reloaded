@@ -12,6 +12,7 @@
 #define SWIZZY_THEME
 //#define XTUDO_THEME
 //#define NO_PRINT_CONFIG         //commented to display config
+//#define NO_NETWORKING		//commented to actually use networking...
 
 /* Filesystem drivers */
 

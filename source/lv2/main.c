@@ -141,12 +141,16 @@ int main(){
 
 	xenon_config_init();
 
+#ifndef NO_NETWORKING
+
 	printf(" * network init\n");
 	network_init();
 
 	printf(" * starting httpd server...");
 	httpd_start();
 	printf("success\n");
+
+#endif
 
 	printf(" * usb init\n");
 	usb_init();
