@@ -169,7 +169,7 @@ int try_load_file(char *filename, int filetype)
 	}
 	
 	wait_and_cleanup_line();
-	printf("Trying %s...",filename);
+	printf("Trying %s...\r",filename);
 	
 	int f = open(filename, O_RDONLY);
 	if (f < 0)
@@ -214,27 +214,45 @@ void fileloop() {
         for (i = 3; i < 16; i++) {
                 if (devoptab_list[i]->structSize) {
                         do{
-                           sprintf(filepath, "%s:/%s", devoptab_list[i]->name,filelist[j].filename);
-                           try_load_file(filepath,filelist[j].filetype);
-                           j++;
-                           usb_do_poll();
-                        } while(strcmp(filelist[j].filename, " "));
-                        j = 0;
-                }
-        }
+							sprintf(filepath, "%s:/%s", devoptab_list[i]->name,filelist[j].filename);
+							if ((filelist[j].filetype == TYPE_UPDXELL || filelist[j].filetype == TYPE_NANDIMAGE) && (xenon_get_console_type() == REV_CORONA_PHISON))
+							{
+								wait_and_cleanup_line();
+								printf("MMC Console Detected! Skipping %s...\r", filepath);
+								j++;
+							}
+							else
+							{								
+								try_load_file(filepath,filelist[j].filetype);
+								j++;
+							}
+							usb_do_poll();
+						} while(strcmp(filelist[j].filename, " "));
+						j = 0;
+				}
+		}
 }
 
 void tftp_loop() {
     int i=0;
     do{
-        wait_and_cleanup_line();
-	printf("Trying TFTP %s:%s... ",boot_server_name(),filelist[i].filename);
-	boot_tftp(boot_server_name(), filelist[i].filename, filelist[i].filetype);
-        i++;
-        network_poll();
-    } while(strcmp(filelist[i].filename, " "));
+		if ((filelist[i].filetype == TYPE_UPDXELL || filelist[i].filetype == TYPE_NANDIMAGE) && (xenon_get_console_type() == REV_CORONA_PHISON))
+		{
+			wait_and_cleanup_line();
+			printf("Skipping TFTP %s:%s... MMC Detected!\r", boot_server_name(),filelist[i].filename);
+			i++;
+		}
+		else
+		{
+			wait_and_cleanup_line();
+			printf("Trying TFTP %s:%s... \r",boot_server_name(),filelist[i].filename);
+			boot_tftp(boot_server_name(), filelist[i].filename, filelist[i].filetype);
+			i++;
+		}
+		network_poll();
+	} while(strcmp(filelist[i].filename, " "));
     wait_and_cleanup_line();
-    printf("Trying TFTP %s:%s... ",boot_server_name(),boot_file_name());
+    printf("Trying TFTP %s:%s...\r",boot_server_name(),boot_file_name());
     /* Assume that bootfile delivered via DHCP is an ELF */
     boot_tftp(boot_server_name(),boot_file_name(),TYPE_ELF);
 }

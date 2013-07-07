@@ -201,6 +201,8 @@ int main(){
 	for(;;){
                 tftp_loop();
 		fileloop();
+		console_clrline();
+		mount_all_devices();
 	}
 
 	return 0;

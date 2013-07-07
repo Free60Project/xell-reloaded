@@ -38,6 +38,7 @@ static unsigned char *base;
 static int image_maxlen;
 
 extern char *kboot_tftp;
+extern void console_clrline();
 
 static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_addr *addr, u16_t port)
 {
@@ -73,6 +74,7 @@ static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_
 			}
 		} else
 		{
+			console_clrline();
 			printf("tftp: out of sequence block! (got %d, expected %d)\n", this_block, current_block + 1);
 			if (this_block == current_block)
 			{
@@ -89,6 +91,7 @@ static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_
 		//printf("TFTP got ERROR\n");
 		tftp_state = TFTP_STATE_FINISH;
 			/* please don't overflow this. */
+		console_clrline();
 		printf("tftp error %d: %s", (d[2] << 8) | d[3], d + 4);
 		tftp_result = -2;
 		break;
@@ -172,11 +175,15 @@ int do_tftp(void *target, int maxlen, struct ip_addr server, const char *file)
 		if (tb_diff_msec(now, start) > 500)
 		{
 			if (tftp_state == TFTP_STATE_RRQ_SEND)
+			{
+				console_clrline();
 				printf("TFTP: no answer from server");
+			}
 			else
 			{
 				if (!current_block)
 					tftp_state = TFTP_STATE_RRQ_SEND;
+				console_clrline();
 				printf("TFTP: packet lost (%d)\n", current_block);
 			}
 			tries++;
@@ -221,7 +228,10 @@ int do_tftp(void *target, int maxlen, struct ip_addr server, const char *file)
 				d += 6;
 				
 				if (udp_sendto(pcb, p, &server, 69))
+				{
+					console_clrline();
 					printf("TFTP: packet send error.");
+				}
 				pbuf_free(p);
 				send = 0;
 				break;
@@ -253,6 +263,7 @@ int do_tftp(void *target, int maxlen, struct ip_addr server, const char *file)
 		}
 		uint64_t end;
 		end=mftb();
+		console_clrline();
 		printf("%d packets (%d bytes, %d packet size), received in %dms, %d kb/s\n",
 			current_block, ptr, last_size, (int)tb_diff_msec(end, ts), 
 			(int)(ptr / 1024 * 1000 / tb_diff_msec(end, ts)));
@@ -277,12 +288,14 @@ int boot_tftp(const char *server_addr, const char *tftp_bootfile, int filetype)
 	//printf(server_addr);
 	if (!ipaddr_aton(server_addr, &server_address))
 	{
+		console_clrline();
 		printf("no server address given");
 		server_address.addr = 0;
 	}
 	
 	if (!server_address.addr)
 	{
+		console_clrline();
 		printf("no tftp server address");
 		//printf(msg);
 		return -1;
@@ -290,6 +303,7 @@ int boot_tftp(const char *server_addr, const char *tftp_bootfile, int filetype)
 	
 	if (!(tftp_bootfile && *tftp_bootfile))
 	{
+		console_clrline();
 		printf("no tftp bootfile name");
 		//printf(msg);
 		return -1;

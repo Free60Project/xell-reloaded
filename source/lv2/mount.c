@@ -468,60 +468,68 @@ static int FindPartitions(int device) {
 	return devnum;
 }
 
-//static void UnmountPartitions(int device) {
-//	char mount[11];
-//	int i;
-//	for (i = 0; i < MAX_DEVICES; i++) {
-//		switch (part[device][i].type) {
-//#ifdef FS_FAT
-//			case T_FAT:
-//				part[device][i].type = 0;
-//				sprintf(mount, "%s:", part[device][i].mount);
-//				fatUnmount(mount);
-//				break;
-//#endif
-//#ifdef FS_NTFS
-//			case T_NTFS:
-//				part[device][i].type = 0;
-//				ntfsUnmount(part[device][i].mount, false);
-//				break;
-//#endif
-//#ifdef FS_EXT2FS
-//			case T_EXT2:
-//				part[device][i].type = 0;
-//				ext2Unmount(part[device][i].mount);
-//				break;
-//#endif
-//#ifdef FS_ISO9660
-//			case T_ISO9660:
-//				part[device][i].type = 0;
-//				sprintf(mount, "%s:", part[device][i].mount);
-//				ISO9660_Unmount(mount);
-//				break;
-//#endif
-//		}
-//		part[device][i].name[0] = 0;
-//		part[device][i].mount[0] = 0;
-//		part[device][i].sector = 0;
-//		part[device][i].interface = NULL;
-//	}
-//}
+static void UnmountPartitions(int device) {
+	char mount[11];
+	int i;
+	for (i = 0; i < MAX_DEVICES; i++) {
+		switch (part[device][i].type) {
+#ifdef FS_FAT
+			case T_FAT:
+				part[device][i].type = 0;
+				sprintf(mount, "%s:", part[device][i].mount);
+				fatUnmount(mount);
+				break;
+#endif
+#ifdef FS_NTFS
+			case T_NTFS:
+				part[device][i].type = 0;
+				ntfsUnmount(part[device][i].mount, false);
+				break;
+#endif
+#ifdef FS_EXT2FS
+			case T_EXT2:
+				part[device][i].type = 0;
+				ext2Unmount(part[device][i].mount);
+				break;
+#endif
+#ifdef FS_ISO9660
+			case T_ISO9660:
+				part[device][i].type = 0;
+				sprintf(mount, "%s:", part[device][i].mount);
+				ISO9660_Unmount(mount);
+				break;
+#endif
+		}
+		part[device][i].name[0] = 0;
+		part[device][i].mount[0] = 0;
+		part[device][i].sector = 0;
+		part[device][i].interface = NULL;
+	}
+}
 
 /**
  * Parse mbr for filesystem
  */
+
+int hdd_dvd_mounted = 0; //Prevent mounting the DVD and HDD again...
+
 void mount_all_devices() {
+	UnmountPartitions(DEVICE_USB); // Unmount first to prevent stack overflow ;)
 	FindPartitions(DEVICE_USB);
-	
-	if (xenon_atapi_ops.isInserted()) {
-		FindPartitions(DEVICE_ATAPI);
-	}
-	
-	if (xenon_ata_ops.isInserted()) {
+
+	if (hdd_dvd_mounted == 0) //Prevent mounting the DVD and HDD again...
+	{
+		if (xenon_atapi_ops.isInserted()) {
+			FindPartitions(DEVICE_ATAPI);
+		}
+
+		if (xenon_ata_ops.isInserted()) {
 #ifdef FS_XTAF
-		if (XTAFMount() == 0)
+			if (XTAFMount() == 0)
 #endif
-			FindPartitions(DEVICE_ATA);
+				FindPartitions(DEVICE_ATA);
+		}
+		hdd_dvd_mounted = 1; //Prevent mounting the DVD and HDD again...
 	}
 }
 
