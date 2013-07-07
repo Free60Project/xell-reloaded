@@ -22,6 +22,9 @@
 
 #include "httpd_index.h"
 
+#include <xenon_smc/xenon_smc.h> //For reboot and shutdown commands
+#include <time/time.h> //For delay...
+extern void console_clrline();
 
 #define hdprintf(x...)
 // fprintf(stderr, x)
@@ -817,6 +820,36 @@ static int response_log_process_request(struct http_state *http, const char *met
 	return 1;
 }
 
+static int response_reboot_process_request(struct http_state *http, const char *method, const char *url)
+{
+	if (strcmp(method, "GET"))
+		return 0;
+	if (strcmp(url, "/REBOOT"))
+		return 0;
+	http->code = 200;
+	response_static_process_request(http, "Console is rebooting...");
+	console_clrline();
+	printf("Rebooting console in 5 seconds...");
+	delay(5);
+	xenon_smc_power_reboot();
+	return 1;
+}
+
+static int response_shutdown_process_request(struct http_state *http, const char *method, const char *url)
+{
+	if (strcmp(method, "GET"))
+		return 0;
+	if (strcmp(url, "/SHUTDOWN"))
+		return 0;
+	http->code = 200;
+	response_static_process_request(http, "Console is shutting down...");
+	console_clrline();
+	printf("Shutting down console in 5 seconds...");
+	delay(5);
+	xenon_smc_power_shutdown();
+	return 1;
+}
+
 struct httpd_handler http_handler[]=
 	{
 #ifdef UNIX
@@ -836,6 +869,8 @@ struct httpd_handler http_handler[]=
 		{response_keyvault2_process_request, 0, 0, response_keyvault2_do_header, response_keyvault2_do_data, 0, response_keyvault2_finish},
 //		{response_setdvdkey_process_request, 0, 0, response_setdvdkey_do_header, response_setdvdkey_do_data, response_setdvdkey_finish},
 		{response_log_process_request, 0, 0, 0, response_static_do_data, 0, response_static_finish},
+		{response_reboot_process_request, 0, 0, 0, response_static_do_data, 0, response_static_finish},
+		{response_shutdown_process_request, 0, 0, 0, response_static_do_data, 0, response_static_finish},
 		{response_err400_process_request, 0, 0, 0, response_static_do_data, 0, response_static_finish},
 
 		//Should always be at the end!
