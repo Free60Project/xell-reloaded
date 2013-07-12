@@ -148,12 +148,13 @@ int launch_file(void * addr, unsigned len, int filetype){
 			printf(" * Loading kboot.conf ...\n");
             ret = try_kbootconf(addr,len);
             break;
-        case TYPE_UPDXELL:
-			if (memcmp(addr + XELL_FOOTER_OFFSET, XELL_FOOTER, XELL_FOOTER_LENGTH) || len != XELL_SIZE)
-				return -1;
-            printf(" * Loading UpdXeLL binary...\n");
-            ret = updateXeLL(addr,len);
-            break;
+   // This shit is broken!
+   //     case TYPE_UPDXELL:
+			//if (memcmp(addr + XELL_FOOTER_OFFSET, XELL_FOOTER, XELL_FOOTER_LENGTH) || len != XELL_SIZE)
+			//	return -1;
+   //         printf(" * Loading UpdXeLL binary...\n");
+   //         ret = updateXeLL(addr,len);
+   //         break;
 		default:
 			printf("! Unsupported filetype supplied!\n");
 	}
@@ -167,6 +168,12 @@ int try_load_file(char *filename, int filetype)
 		try_rawflash(filename);
 		return -1;
 	}
+
+	if (filetype == TYPE_UPDXELL)
+	{
+		updateXeLL(filename);
+		return -1;
+	}
 	
 	wait_and_cleanup_line();
 	printf("Trying %s...\r",filename);
@@ -178,12 +185,20 @@ int try_load_file(char *filename, int filetype)
 	}
 
 	struct stat s;
-	fstat(f, &s);
+	if (fstat(f, &s) != 0) // Make sure FStat actually works...
+		return -1;
 
-	int size = s.st_size;
+	long size = s.st_size;
+
+	if (size <= 0)
+	{
+		close(f);
+		return -1;
+	}
+
 	void * buf=malloc(size);
 
-	printf("\n * '%s' found, loading %d...\n",filename,size);
+	printf("\n * '%s' found, loading %ld...\n",filename,size);
 	int r = read(f, buf, size);
 	if (r < 0)
 	{
