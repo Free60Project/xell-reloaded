@@ -37,11 +37,11 @@ const unsigned char cpiohdr[] = {0x30, 0x37, 0x30, 0x37};
 const unsigned char kboothdr[] = "#KBOOTCONFIG";
 
 struct filenames filelist[] = {
-    {"updxell.bin",TYPE_UPDXELL},
     {"kboot.conf",TYPE_KBOOT},
     {"xenon.elf",TYPE_ELF},
     {"xenon.z",TYPE_ELF},
     {"vmlinux",TYPE_ELF},
+	{"updxell.bin",TYPE_UPDXELL},
     {"updflash.bin",TYPE_NANDIMAGE},
 	{" ", TYPE_ELF}
     //{NULL, NULL} //Dunno why this is here? :S
