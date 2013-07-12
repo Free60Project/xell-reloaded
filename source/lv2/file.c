@@ -178,23 +178,18 @@ int try_load_file(char *filename, int filetype)
 	wait_and_cleanup_line();
 	printf("Trying %s...\r",filename);
 	
-	int f = open(filename, O_RDONLY);
-	if (f < 0)
-	{
-		return f;
-	}
-
 	struct stat s;
-	if (fstat(f, &s) != 0) // Make sure FStat actually works...
-		return -1;
+	stat(filename, &s);
 
 	long size = s.st_size;
 
-	if (size <= 0)
-	{
-		close(f);
-		return -1;
-	}
+	if (size <= 0) 
+		return -1; //Size is invalid
+
+	int f = open(filename, O_RDONLY);
+
+	if (f < 0)
+		return f; //File wasn't opened...
 
 	void * buf=malloc(size);
 
