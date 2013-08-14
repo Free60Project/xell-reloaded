@@ -411,7 +411,7 @@ static int FindPartitions(int device) {
 				case PARTITION_TYPE_EMPTY:
 					debug_printf("Partition %i: Claims to be empty\n", i + 1);
 					// Unknown or unsupported partition type
-				default:
+				/*default:
 				{
 					// Check if this partition has a valid NTFS boot record anyway,
 					// it might be misrepresented due to a lazy partition editor
@@ -437,7 +437,8 @@ static int FindPartitions(int device) {
 						}
 					}
 					break;
-				}
+				
+				}*/
 			}
 		}
 	}
