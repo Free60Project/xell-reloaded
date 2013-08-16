@@ -17,7 +17,7 @@ include $(DEVKITXENON)/rules
 #---------------------------------------------------------------------------------
 TARGET		:=	stage2
 BUILD		:=	build
-SOURCES		:=	source/lv2 source/lv2/tftp source/lv2/httpd source/lv2/linux source/lv2/kboot
+SOURCES		:=	source/lv2 source/lv2/tftp source/lv2/httpd source/lv2/linux source/lv2/kboot source/lv1/puff
 DATA		:=	data
 INCLUDES	:=	source/lv2
 
@@ -36,7 +36,7 @@ LDFLAGS	=	-g $(MACHDEP) -Wl,--gc-sections -Wl,-Map,$(notdir $@).map
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=	-lxenon -lz -lfat -lext2fs -lntfs -lxtaf -lm
+LIBS	:=	-lxenon -lfat -lext2fs -lntfs -lxtaf -lm
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

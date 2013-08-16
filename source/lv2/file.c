@@ -9,7 +9,7 @@ used for zlib support ...
 #include <string.h>
 #include <assert.h>
 #include <string.h>
-#include <zlib.h>
+//#include <zlib.h>
 #include <xetypes.h>
 #include <elf/elf.h>
 #include <network/network.h>
@@ -24,6 +24,7 @@ used for zlib support ...
 #include "file.h"
 #include "kboot/kbootconf.h"
 #include "tftp/tftp.h"
+#include "../lv1/puff/puff.h"
 
 #define CHUNK 16384
 
@@ -47,58 +48,58 @@ struct filenames filelist[] = {
     //{NULL, NULL} //Dunno why this is here? :S
 };
 //Decompress a gzip file ...
-int inflate_read(char *source,int len,char **dest,int * destsize, int gzip) {
-	int ret;
-	unsigned have;
-	z_stream strm;
-	unsigned char out[CHUNK];
-	int totalsize = 0;
-
-	/* allocate inflate state */
-	strm.zalloc = Z_NULL;
-	strm.zfree = Z_NULL;
-	strm.opaque = Z_NULL;
-	strm.avail_in = 0;
-	strm.next_in = Z_NULL;
-	
-	if(gzip)
-		ret = inflateInit2(&strm, 16+MAX_WBITS);
-	else
-		ret = inflateInit(&strm);
-		
-	if (ret != Z_OK)
-		return ret;
-
-	strm.avail_in = len;
-	strm.next_in = (Bytef*)source;
-
-	/* run inflate() on input until output buffer not full */
-	do {
-		strm.avail_out = CHUNK;
-		strm.next_out = (Bytef*)out;
-		ret = inflate(&strm, Z_NO_FLUSH);
-		assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
-		switch (ret) {
-		case Z_NEED_DICT:
-			ret = Z_DATA_ERROR;     /* and fall through */
-		case Z_DATA_ERROR:
-		case Z_MEM_ERROR:
-			inflateEnd(&strm);
-			return ret;
-		}
-		have = CHUNK - strm.avail_out;
-		totalsize += have;
-                if (totalsize > ELF_MAXSIZE)
-                    return Z_BUF_ERROR;
-		//*dest = (char*)realloc(*dest,totalsize);
-		memcpy(*dest + totalsize - have,out,have);
-		*destsize = totalsize;
-	} while (strm.avail_out == 0);
-
-	/* clean up and return */
-	(void)inflateEnd(&strm);
-	return ret == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
-}
+//int inflate_read(char *source,int len,char **dest,int * destsize, int gzip) {
+//	int ret;
+//	unsigned have;
+//	z_stream strm;
+//	unsigned char out[CHUNK];
+//	int totalsize = 0;
+//
+//	/* allocate inflate state */
+//	strm.zalloc = Z_NULL;
+//	strm.zfree = Z_NULL;
+//	strm.opaque = Z_NULL;
+//	strm.avail_in = 0;
+//	strm.next_in = Z_NULL;
+//	
+//	if(gzip)
+//		ret = inflateInit2(&strm, 16+MAX_WBITS);
+//	else
+//		ret = inflateInit(&strm);
+//		
+//	if (ret != Z_OK)
+//		return ret;
+//
+//	strm.avail_in = len;
+//	strm.next_in = (Bytef*)source;
+//
+//	/* run inflate() on input until output buffer not full */
+//	do {
+//		strm.avail_out = CHUNK;
+//		strm.next_out = (Bytef*)out;
+//		ret = inflate(&strm, Z_NO_FLUSH);
+//		assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
+//		switch (ret) {
+//		case Z_NEED_DICT:
+//			ret = Z_DATA_ERROR;     /* and fall through */
+//		case Z_DATA_ERROR:
+//		case Z_MEM_ERROR:
+//			inflateEnd(&strm);
+//			return ret;
+//		}
+//		have = CHUNK - strm.avail_out;
+//		totalsize += have;
+//                if (totalsize > ELF_MAXSIZE)
+//                    return Z_BUF_ERROR;
+//		//*dest = (char*)realloc(*dest,totalsize);
+//		memcpy(*dest + totalsize - have,out,have);
+//		*destsize = totalsize;
+//	} while (strm.avail_out == 0);
+//
+//	/* clean up and return */
+//	(void)inflateEnd(&strm);
+//	return ret == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
+//}
 
 void wait_and_cleanup_line()
 {
@@ -121,8 +122,9 @@ int launch_file(void * addr, unsigned len, int filetype){
 				//found a gzip file
                 printf(" * Found a gzip file...\n");
                 char * dest = malloc(ELF_MAXSIZE);
-                int destsize = 0;
-                if(inflate_read((char*)addr, len, &dest, &destsize, 1) == 0){
+                long unsigned int destsize = 0;
+                //if(inflate_read((char*)addr, len, &dest, &destsize, 1) == 0){
+				if (puff((unsigned char*)dest, &destsize, addr, (long unsigned int*)&len)==0){
 					//relocate elf ...
                     memcpy(addr,dest,destsize);
                     printf(" * Successfully unpacked...\n");
