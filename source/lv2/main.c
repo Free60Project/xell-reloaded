@@ -203,8 +203,8 @@ int main(){
 
 	printf("\n * Looking for files on local media and TFTP...\n\n");
 	for(;;){
-                tftp_loop();
 		fileloop();
+		tftp_loop(); //less likely to find something...
 		console_clrline();
 		mount_all_devices();
 	}
