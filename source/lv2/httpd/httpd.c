@@ -18,7 +18,6 @@
 #include "httpd/httpd_flash.h"
 #include "httpd/httpd_fuse.h"
 #include "httpd_keyvault.h"
-#include "httpd_keyvault2.h"
 
 #include "httpd_index.h"
 
@@ -859,14 +858,9 @@ struct httpd_handler http_handler[]=
 		{response_mem_process_request, 0, 0, response_mem_do_header, response_mem_do_data, 0, response_mem_finish},
 #endif
 		{response_fuse_process_request, 0, 0, response_fuse_do_header, response_fuse_do_data, 0, response_fuse_finish},
-#ifdef HTTPD_VFS		
-		{response_vfs_process_request, 0, 0, response_vfs_do_header, response_vfs_do_data, 0, response_vfs_finish},
-#else
 		{response_index_process_request, 0, 0, response_index_do_header, response_index_do_data, 0, response_index_finish},
-#endif
 		{response_flash_process_request,  0, 0, response_flash_do_header, response_flash_do_data, 0, response_flash_finish},
 		{response_keyvault_process_request, 0, 0, response_keyvault_do_header, response_keyvault_do_data, 0, response_keyvault_finish},
-		{response_keyvault2_process_request, 0, 0, response_keyvault2_do_header, response_keyvault2_do_data, 0, response_keyvault2_finish},
 //		{response_setdvdkey_process_request, 0, 0, response_setdvdkey_do_header, response_setdvdkey_do_data, response_setdvdkey_finish},
 		{response_log_process_request, 0, 0, 0, response_static_do_data, 0, response_static_finish},
 		{response_reboot_process_request, 0, 0, 0, response_static_do_data, 0, response_static_finish},

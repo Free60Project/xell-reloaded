@@ -225,22 +225,3 @@ char *INDEX_HTML[] = {
 	"</div>",
 	"</body></html>",
 };
-
-char *DVD_HTML[]  = {
-		"<html>\n",
-		"<title>XeLL-Reloaded v1.0</title>\n",
-		"<body>\n",
-		"<br />\n",
-		"<h4>\n",
-		"Result:<br />\n",
-		"DVD_KEY",					// <========================= DVD_KEY
-		"</h4>\n",
-		"<p>\n",
-		"<a href=\"index.html\">\n",
-		"Back</a>\n",
-		"</p><br />\n",
-		"</body>\n",
-		"</html>\n"
-};
-
-
