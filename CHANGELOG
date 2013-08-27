@@ -9,6 +9,9 @@ Logfile writing to USB or HTTP Webinterface
 Dumps ANA-Registers to UART / Logfile
 "Shutdown" and "Reboot" via HTTP Webinterface
 Option to disable Network via xell config
+Support for all 3 USB busses
+ * Crashing when USB is plugged out or attached at runtime
+Switched from zlib to puff (smaller)
 
 v0.991 - 19/02/2012
 ! Fixing booting of Linux Kernel on Reset Glitch Hack Consoles !
