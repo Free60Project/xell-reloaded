@@ -239,7 +239,7 @@ void fileloop() {
 								j++;
 							}
 							usb_do_poll();
-						} while(strcmp(filelist[j].filename, " "));
+						} while(strcmp(filelist[j].filename, " ") && devoptab_list[i]->structSize);
 						j = 0;
 				}
 		}
