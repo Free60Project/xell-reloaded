@@ -1,0 +1,23 @@
+#!/bin/bash
+
+GITREV=v0.992 # A git command would be nicer...
+
+make clean
+make
+
+mkdir -p release/_DEBUG
+cp *.bin release/
+gunzip *.gz
+cp stage2.elf32 release/stage2.elf
+cp stage2.elf release/_DEBUG/
+cp AUTHORS release/
+cp CHANGELOG release/
+cp README release/
+
+cd release
+tar czvf XeLL_Reloaded-2stages-${GITREV}.tar.gz *
+mv *.tar.gz ..
+cd ..
+rm -rf release
+
+make clean
