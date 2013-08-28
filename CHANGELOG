@@ -17,6 +17,7 @@ Support for all 3 USB busses
  * Crashing when USB is plugged out or attached at runtime
 Switched from zlib to puff (smaller)
 Support for mounting 1 USB memory device at runtime
+Better support for big USB devices (or poorly formatted ones)
 
 v0.991 - 19/02/2012
 ! Fixing booting of Linux Kernel on Reset Glitch Hack Consoles !
