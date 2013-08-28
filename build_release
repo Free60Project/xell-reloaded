@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GITREV=v0.992 # A git command would be nicer...
+GITREV=$(git describe --tags $(git rev-list --tags --max-count=1))
 
 make clean
 make
@@ -8,7 +8,7 @@ make
 mkdir -p release/_DEBUG
 cp *.bin release/
 gunzip *.gz
-cp stage2.elf32 release/stage2.elf
+cp stage2.elf32 release/
 cp stage2.elf release/_DEBUG/
 cp AUTHORS release/
 cp CHANGELOG release/
