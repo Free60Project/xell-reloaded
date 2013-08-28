@@ -1,4 +1,8 @@
-v0.992 - 09/08/2013
+v0.993 - 28/08/2013
+Disabled USB writes for the logfile (not working with EXT# anyways
+Fixed the crashing when unplugging USB memories at runtime
+
+v0.992 - 27/08/2013 * Released by a trigger happy Tuxuser *
 ! Corona video support !
  * NTSC gives weird black/white screen
 eMMC Reading support for Corona consoles (no flashing!)
@@ -12,6 +16,7 @@ Option to disable Network via xell config
 Support for all 3 USB busses
  * Crashing when USB is plugged out or attached at runtime
 Switched from zlib to puff (smaller)
+Support for mounting 1 USB memory device at runtime
 
 v0.991 - 19/02/2012
 ! Fixing booting of Linux Kernel on Reset Glitch Hack Consoles !
