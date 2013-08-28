@@ -497,6 +497,7 @@ static int FindPartitions(int device) {
 	return devnum;
 }
 
+/*
 static void UnmountPartitions(int device) {
 	char mount[11];
 	int i;
@@ -535,21 +536,39 @@ static void UnmountPartitions(int device) {
 		part[device][i].interface = NULL;
 	}
 }
+*/
 
 /**
  * Parse mbr for filesystem
  */
 
 int hdd_dvd_mounted = 0; //Prevent mounting the DVD and HDD again...
+extern void (*mount_usb_device)(int device);
+
+void mount_usb(int device)
+{
+	switch (device)
+	{
+		case 0:
+			FindPartitions(DEVICE_USB_0);
+			break;
+		case 1:
+			FindPartitions(DEVICE_USB_1);
+			break;
+		case 2:
+			FindPartitions(DEVICE_USB_2);
+			break;
+		default:
+			printf(" ! Mount USB: Unkown USB device... %d\n", device);
+			break;
+	}
+}
 
 void mount_all_devices() {
-	UnmountPartitions(DEVICE_USB_0); // Unmount first to prevent stack overflow ;)
-	UnmountPartitions(DEVICE_USB_1); // Unmount first to prevent stack overflow ;)
-	UnmountPartitions(DEVICE_USB_2); // Unmount first to prevent stack overflow ;)
-
 	FindPartitions(DEVICE_USB_0);
 	FindPartitions(DEVICE_USB_1);
 	FindPartitions(DEVICE_USB_2);
+	mount_usb_device = mount_usb;
 	
 	if (hdd_dvd_mounted == 0) //Prevent mounting the DVD and HDD again...
 	{

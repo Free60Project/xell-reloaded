@@ -163,7 +163,7 @@ int main(){
 	xenon_atapi_init();
 
 	mount_all_devices();
-	int device_list_size = findDevices();
+	/*int device_list_size = */ findDevices();
 	/* display some cpu info */
 	printf(" * CPU PVR: %08x\n", mfspr(287));
 
@@ -200,13 +200,12 @@ int main(){
 	//	}
 	//}
 	
-
+	mount_all_devices();
 	printf("\n * Looking for files on local media and TFTP...\n\n");
 	for(;;){
 		fileloop();
 		tftp_loop(); //less likely to find something...
-		console_clrline();
-		mount_all_devices();
+		console_clrline();		
 	}
 
 	return 0;

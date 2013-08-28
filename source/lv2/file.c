@@ -226,6 +226,9 @@ void fileloop() {
         for (i = 3; i < 16; i++) {
                 if (devoptab_list[i]->structSize) {
                         do{
+							usb_do_poll();
+							if (!devoptab_list[i]->structSize)
+								break;
 							sprintf(filepath, "%s:/%s", devoptab_list[i]->name,filelist[j].filename);
 							if ((filelist[j].filetype == TYPE_UPDXELL || filelist[j].filetype == TYPE_NANDIMAGE) && (xenon_get_console_type() == REV_CORONA_PHISON))
 							{
@@ -238,8 +241,7 @@ void fileloop() {
 								try_load_file(filepath,filelist[j].filetype);
 								j++;
 							}
-							usb_do_poll();
-						} while(strcmp(filelist[j].filename, " ") && devoptab_list[i]->structSize);
+						} while(strcmp(filelist[j].filename, " "));
 						j = 0;
 				}
 		}
