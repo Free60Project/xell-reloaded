@@ -159,8 +159,10 @@ int main(){
 	printf(" * sata hdd init\n");
 	xenon_ata_init();
 
+#ifndef NO_DVD
 	printf(" * sata dvd init\n");
 	xenon_atapi_init();
+#endif
 
 	mount_all_devices();
 	/*int device_list_size = */ findDevices();
