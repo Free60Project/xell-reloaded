@@ -261,6 +261,9 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 #ifdef CYGNOS
 	/* set UART to 38400, 8, N, 1 */
 	*(volatile uint32_t*)0x80000200ea00101c = 0xae010000;
+#else
+	/* set UART to 115400, 8, N, 1 */
+	*(volatile uint32_t*)0x80000200ea00101c = 0xe6010000;
 #endif
 
 	printf("\nXeLL - First stage\n");
