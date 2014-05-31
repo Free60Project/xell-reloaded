@@ -8,7 +8,7 @@ size_t vfs_console_len = 0;
 extern void (*stdlog_hook)(const char *src, int len);
 static int DoLog = 0;
 
-static void log_hook(const char *src, size_t len) {
+static void log_hook(const char *src, int len) {
 	if (DoLog) {
 		memcpy(&vfs_console_buff[vfs_console_len], src, len);
 		vfs_console_len += len;
