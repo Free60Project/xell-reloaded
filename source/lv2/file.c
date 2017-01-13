@@ -180,26 +180,33 @@ int try_load_file(char *filename, int filetype)
 	wait_and_cleanup_line();
 	printf("Trying %s...\r",filename);
 	
-	struct stat s;
-	stat(filename, &s);
+	FILE *f = fopen(filename, "r");
 
-	long size = s.st_size;
-
-	if (size <= 0) 
+	if (fileno(f) < 0) 
+		return -1; //File wasn't opened...
+	
+	int status = fseek(f, 0, SEEK_END);
+	if (status < 0)
+		return -1;
+	
+	long size = ftell(f);
+	
+	status = fseek(f, SEEK_SET);
+	if (status < 0)
+		return -1;
+	
+	if (size <= 0) {
+		fclose(f);
 		return -1; //Size is invalid
-
-	int f = open(filename, O_RDONLY);
-
-	if (f < 0)
-		return f; //File wasn't opened...
-
+	}
+	
 	void * buf=malloc(size);
 
 	printf("\n * '%s' found, loading %ld...\n",filename,size);
-	int r = read(f, buf, size);
+	int r = fread(buf, size, 1, f);
+	fclose(f);
 	if (r < 0)
 	{
-		close(f);
 		free(buf);
 		return r;
 	}
