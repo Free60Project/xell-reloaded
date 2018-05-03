@@ -3,6 +3,7 @@ used for zlib support ...
 */
 
 enum {
+    TYPE_INVALID,
     TYPE_ELF,
     TYPE_INITRD,
     TYPE_KBOOT,

@@ -273,13 +273,14 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 #ifdef HACK_JTAG
 		printf(" * Attempting to catch all CPUs...\n");
 
-
+		// Place jumps in all of the exception vectors.
 		for (i=0; i<sizeof(exc)/sizeof(*exc); ++i)
 			place_jump((void*)hrmor + exc[i], start_from_rom);
 
 
 		printf(" * place_jump ...\n");
 
+		// Program exception vector
 		place_jump((void*)0x8000000000000700, start_from_rom);
 
 		printf(" * while ...\n");
@@ -297,6 +298,7 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 				while (*(volatile uint64_t*)(0x8000020000050050ULL + i * 0x1000) != 0x7C);
 			}
 
+			// IPI request
 			*(uint64_t*)(0x8000020000052010ULL) = 0x3e0078;
 		}
 

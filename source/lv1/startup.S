@@ -144,7 +144,7 @@ other_threads_startup:
 	isync
 
 1:
-	li	%r4,0x30
+	li	%r4,0x30 // Clear IR/DR
 	mfmsr	%r3
 	andc	%r3,%r3,%r4
 	mtsrr1	%r3
@@ -214,7 +214,7 @@ jump:
 	sync
 	mtsrr0 %r6
 
-		/* switch into real mode */
+		/* switch into real mode (clear IR/DR) */
 	mfmsr %r6
 	li %r7, 0x30
 	andc %r6, %r6, %r7
