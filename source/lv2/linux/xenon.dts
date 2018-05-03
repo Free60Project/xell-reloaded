@@ -15,6 +15,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/dts-v1/;
 
 / {
 	model = "Xenon Game Console";
@@ -26,12 +27,12 @@
      * Bootargs will be created here, as well as initrd properties if relevant
      */
 	chosen {
-		linux,platform = <00000801>;
+		linux,platform = <0x00000801>;
 	};
 
 	memory {
 		device_type = "memory";
-		reg = <00000000 00000000 1e000000>;
+		reg = <0x00000000 0x00000000 0x1e000000>;
 	};
 
 	cpus {
@@ -44,38 +45,38 @@
 			linux,boot-cpu;
 			reg = <0>;
 			ibm,ppc-interrupt-server#s = <0 1>;
-			timebase-frequency = <2FAF080>; // 50 MHz
-			i-cache-size = <8000>;
-			i-cache-line-size = <80>;
-			d-cache-size = <8000>;
-			d-cache-line-size = <80>;
+			timebase-frequency = <0x2FAF080>; // 50 MHz
+			i-cache-size = <0x8000>;
+			i-cache-line-size = <0x80>;
+			d-cache-size = <0x8000>;
+			d-cache-line-size = <0x80>;
 
 					/* this must be configured with regard to the HID6:LB value */
 			ibm,segment-page-sizes = <
-				C    0 1 c   0     // 4k page
-				10 100 1 10 00     // 64k pages
-				18 110 1 18 01     // 16M pages
+				0xC   0     1 0xc   0     // 4k page
+				0x10  0x100 1 0x10 00     // 64k pages
+				0x18  0x110 1 0x18 01     // 16M pages
 			>;
 		};
 		Xenon,PPE@1 {
 			device_type = "cpu";
 			reg = <2>;
 			ibm,ppc-interrupt-server#s = <2 3>;
-			timebase-frequency = <2FAF080>;
-			i-cache-size = <8000>;
-			i-cache-line-size = <80>;
-			d-cache-size = <8000>;
-			d-cache-line-size = <80>;
+			timebase-frequency = <0x2FAF080>;
+			i-cache-size = <0x8000>;
+			i-cache-line-size = <0x80>;
+			d-cache-size = <0x8000>;
+			d-cache-line-size = <0x80>;
 		};
 		Xenon,PPE@2 {
 			device_type = "cpu";
 			reg = <4>;
 			ibm,ppc-interrupt-server#s = <4 5>;
-			timebase-frequency = <2FAF080>;
-			i-cache-size = <8000>;
-			i-cache-line-size = <80>;
-			d-cache-size = <8000>;
-			d-cache-line-size = <80>;
+			timebase-frequency = <0x2FAF080>;
+			i-cache-size = <0x8000>;
+			i-cache-line-size = <0x80>;
+			d-cache-size = <0x8000>;
+			d-cache-line-size = <0x80>;
 		};
 	};
 
@@ -86,44 +87,45 @@
 		#size-cells = <1>;
 		#interrupt-cells = <1>;
 		
-		interrupt-parent = <40000>;
+		interrupt-parent = <0x40000>;
 		// interrupts = <18 2>;
-		interrupt-map-mask = <f900 0 0 0>; // type, lower, upper, irq
+		interrupt-map-mask = <0xf900 0 0 0>; // type, lower, upper, irq
 
 		interrupt-map = <
-			0000 0 0 0  40000 44  // audio out (?)
-			0800 0 0 0  40000 24  // SATA cdrom
-			1000 0 0 0  40000 20  // SATA disk
-			2000 0 0 0  40000 2c  // USB OHCI #1
-			2100 0 0 0  40000 30  // USB EHCI #1
-			2800 0 0 0  40000 34  // USB OHCI #2
-			2900 0 0 0  40000 38  // USB EHCI #2
-			3800 0 0 0  40000 4c  // Enet
-			4000 0 0 0  40000 18  // Flash
-			4800 0 0 0  40000 40  // XMA (?)
-			5000 0 0 0  40000 14  // SMM, GPIO, ...
+			0x0000 0 0 0  0x40000 0x40  // XMA
+			0x0800 0 0 0  0x40000 0x24  // SATA cdrom
+			0x1000 0 0 0  0x40000 0x20  // SATA disk
+			0x2000 0 0 0  0x40000 0x2c  // USB OHCI #1
+			0x2100 0 0 0  0x40000 0x30  // USB EHCI #1
+			0x2800 0 0 0  0x40000 0x34  // USB OHCI #2
+			0x2900 0 0 0  0x40000 0x38  // USB EHCI #2
+			0x3800 0 0 0  0x40000 0x4c  // Enet
+			0x4000 0 0 0  0x40000 0x18  // Flash
+			0x4800 0 0 0  0x40000 0x44  // audio out
+			0x5000 0 0 0  0x40000 0x14  // SMM, GPIO, ...
+			0x7800 0 0 0  0x40000 0x58  // Xenos
 		>;
 
 		bus-range = <0 0>;
 		ranges = <
-			02000000 00000000 80000000 00000200 80000000 80000000 // PCI space at 80000000 is mapped to 200 80000000
-			02000000 00000000 00000000 00000000 00000000 20000000 // RAM is 1:1 mapped
+			0x02000000 0x00000000 0x80000000 0x00000200 0x80000000 0x80000000 // PCI space at 80000000 is mapped to 200 80000000
+			0x02000000 0x00000000 0x00000000 0x00000000 0x00000000 0x20000000 // RAM is 1:1 mapped
 		>;
 	};
 
 	interrupt-controller {
 		compatible = "xenon";
-		linux,phandle = <40000>;
+		linux,phandle = <0x40000>;
 		interrupt-controller;
 		#address-cells = <0>;
 		#interrupt-cells = <1>;
 		built-in;
-		reg = <00000200 00050000 6000>;
+		reg = <0x00000200 0x00050000 0x6000>;
 		interrupts = <
-			7c 78 74 70 6c 68 64 60
-			5c 58 54 50 4c 48 44 40
-			3c 38 34 30 2c 28 24 20
-			1c 18 14 10 0c 08 04 
+			0x7c 0x78 0x74 0x70 0x6c 0x68 0x64 0x60
+			0x5c 0x58 0x54 0x50 0x4c 0x48 0x44 0x40
+			0x3c 0x38 0x34 0x30 0x2c 0x28 0x24 0x20
+			0x1c 0x18 0x14 0x10 0x0c 0x08 0x04
 		>;
 	};
 };
