@@ -190,8 +190,8 @@ int try_load_file(char *filename, int filetype)
 		return -1;
 	
 	long size = ftell(f);
-	
-	status = fseek(f, SEEK_SET);
+	 
+	status = fseek(f, 0, SEEK_SET);
 	if (status < 0)
 		return -1;
 	
