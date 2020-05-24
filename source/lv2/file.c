@@ -188,14 +188,14 @@ int try_load_file(char *filename, int filetype) {
 
   FILE *f = fopen(filename, "r");
 
-  if (f < 0)
+  if (f == NULL)
     return -1; // File wasn't opened...
 
   void *buf = malloc(size);
 
   printf("\n * '%s' found, loading %ld...\n", filename, size);
-  int r = fread(buf, size, 1, f);
-  if (r < 0) {
+  int r = fread(buf, 1, size, f);
+  if (r != size) {
     fclose(f);
     free(buf);
     return -1;
@@ -211,7 +211,8 @@ int try_load_file(char *filename, int filetype) {
   }
 
   ret = launch_file(buf, r, filetype);
-
+  
+  fclose(f);
   free(buf);
   return ret;
 }
