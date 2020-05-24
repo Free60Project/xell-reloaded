@@ -75,6 +75,7 @@ xell-1f_cygnos_demon.elf xell-2f_cygnos_demon.elf: CYGNOS_DEF = -DCYGNOS
 
 stage2.elf32.gz: FORCE
 	@rm -f $@
+	@rm -rf $(OBJS)
 	@$(MAKE) --no-print-directory -f Makefile_lv2.mk
 	@$(STRIP) stage2.elf32
 	@gzip -n9 stage2.elf32
