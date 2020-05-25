@@ -22,7 +22,8 @@ DATA		:=	data
 INCLUDES	:=	source/lv2
 
 RELEASE='$(shell git describe --tags $(shell git rev-list --tags --max-count=1))'
-
+GCC_VERSION = $(shell $(CC) --version | grep gcc | awk '{print $$3}')
+BINUTILS_VERSION = $(shell $(PREFIX)ld --version | grep ld | awk '{print $$5}')
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
@@ -136,6 +137,8 @@ endif
 	@echo '' >> $@
 	@echo '#define VERSION RELEASE "-git-" GITREV' >> $@
 	@echo '#define LONGVERSION VERSION " " DATE " (" BLAME ")"' >> $@
+	@echo '#define GCC_VERSION "$(GCC_VERSION)"' >> $@
+	@echo '#define BINUTILS_VERSION "$(BINUTILS_VERSION)"' >> $@
 
 main.o: ../source/lv2/version.h
 
