@@ -120,7 +120,7 @@ int main(){
 	console_init();
 
 	printf("\nXeLL - Xenon linux loader second stage " LONGVERSION "\n");
-
+    printf("\nBuilt with GCC " GCC_VERSION " and Binutils " BINUTILS_VERSION " \n");
 	do_asciiart();
 
 	//delay(3); //give the user a chance to see our splash screen <- network init should last long enough...

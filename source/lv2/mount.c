@@ -164,7 +164,7 @@ enum {
 
 static char *prefix[] = {"uda", "udb", "udc", "sda", "dvd"};
 
-DEVICE_STRUCT part[2][MAX_DEVICES];
+DEVICE_STRUCT part[sizeof(prefix)/sizeof(char *)][MAX_DEVICES];
 
 static void AddPartition(sec_t sector, int device, int type, int *devnum) {
 	int i;
