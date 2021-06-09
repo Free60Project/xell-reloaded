@@ -9,6 +9,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Ensure environment exports
+      run: source /etc/profile.d/99-devkitxenon.sh
     - name: Build
       run: make
     - name: Build (dist)
