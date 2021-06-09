@@ -9,8 +9,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Ensure environment exports
-      run: . /etc/profile.d/99-devkitxenon.sh
+    - name: Export variables
+      run: |
+        export DEVKITXENON=/usr/local/xenon
+        export PATH="$PATH:$DEVKITXENON/bin:$DEVKITXENON/usr/bin"
     - name: Build
       run: make
     - name: Build (dist)
