@@ -1,10 +1,6 @@
 name: build
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -13,5 +9,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: make
+    - name: Export variables
+      run: |
+        echo DEVKITXENON=/usr/local/xenon >> $GITHUB_ENV
+        echo /usr/local/xenon/bin >> $GITHUB_PATH
+        echo /usr/local/xenon/usr/bin >> $GITHUB_PATH
+    - name: Build
       run: make
+    - name: Build (dist)
+      run: make dist
+    - uses: actions/upload-artifact@v2
+      with:
+        name: XeLL-binaries
+        path: XeLL_Reloaded-2stages-*.tar.gz

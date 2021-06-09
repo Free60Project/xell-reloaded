@@ -5,4 +5,4 @@ source/lv2/version.h
 *.elf
 *.elf32
 *.elf32.gz
-
+*.tar.gz

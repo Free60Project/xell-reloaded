@@ -6,7 +6,7 @@ AS=$(CROSS)as
 STRIP=$(CROSS)strip
 
 LV1_DIR=source/lv1
-GITREV='$(shell git describe --tags $(shell git rev-list --tags --max-count=1))'
+GITREV='$(shell git describe --tags)'
 
 # Configuration
 CFLAGS = -Wall -Os -I$(LV1_DIR) -ffunction-sections -fdata-sections \
@@ -37,7 +37,7 @@ clean:
 	@rm -rf $(OBJS) $(foreach name,$(TARGETS),$(addprefix $(name).,bin elf)) stage2.elf32.gz stage2.elf32.7z
 	
 dist: clean all
-	@rm XeLL_Reloaded-2stages-*.tar.gz
+	@rm -rf XeLL_Reloaded-2stages-*.tar.gz
 	@mkdir -p release/_DEBUG
 	@cp *.bin release/
 	@gunzip *.gz
