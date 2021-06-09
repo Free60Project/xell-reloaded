@@ -1,10 +1,7 @@
 name: build
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  push: [push, pull_request]
 
 jobs:
   build:
@@ -13,5 +10,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: make
+    - name: Build
       run: make
+    - name: Build (dist)
+      run: make dist
+    - uses: actions/upload-artifact@v2
+      with:
+        name: XeLL-binaries
+        path: XeLL_Reloaded-2stages-*.tar.gz
