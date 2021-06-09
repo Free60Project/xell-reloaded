@@ -11,8 +11,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: Export variables
       run: |
-        export DEVKITXENON=/usr/local/xenon
-        export PATH="$PATH:$DEVKITXENON/bin:$DEVKITXENON/usr/bin"
+        echo DEVKITXENON=/usr/local/xenon >> $GITHUB_ENV
+        echo /usr/local/xenon/bin >> $GITHUB_PATH
+        echo /usr/local/xenon/usr/bin >> $GITHUB_PATH
     - name: Build
       run: make
     - name: Build (dist)
