@@ -9,6 +9,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - name: Export variables
       run: |
         echo DEVKITXENON=/usr/local/xenon >> $GITHUB_ENV
