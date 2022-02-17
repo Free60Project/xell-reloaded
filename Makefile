@@ -81,7 +81,11 @@ stage2.elf32.gz: FORCE
 	@gzip -n9 stage2.elf32
 
 %.bin: %.elf stage2.elf32.gz
+# 256KB - 16KB of stage 2 - FOOTER bytes == 245744
+	@test `stat -L -c %s stage2.elf32.gz` -le 245744 || (echo "stage2.elf32.gz too large!"; exit 1)
 	@$(OBJCOPY) -O binary $< $@
+# Ensure stage1 is small enough (<= 16KB)
+	@test `stat -L -c %s $@` -le 16384 || (echo "Too large"; exit 1)
 	@truncate --size=262128 $@ # 256k - footer size
 	@echo -n "xxxxxxxxxxxxxxxx" >> $@ # add footer
 	@dd if=stage2.elf32.gz of=$@ conv=notrunc bs=16384 seek=1 # inject stage2
