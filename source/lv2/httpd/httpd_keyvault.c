@@ -85,7 +85,7 @@ int response_keyvault_process_request(struct http_state *http, const char *metho
 
 	priv->hdr_state = 0;
 	priv->ptr = 0;
-	if (sfc.initialized == SFCX_INITIALIZED && !rawBlockMode && !decrypted)
+	if (sfc.initialized == SFCX_INITIALIZED && rawBlockMode && !decrypted)
 		priv->len = bytes_sz;
 	else
 		priv->len = KV_FLASH_SIZE;
