@@ -90,8 +90,10 @@ int response_keyvault_process_request(struct http_state *http, const char *metho
 	else
 		priv->len = KV_FLASH_SIZE;
 	priv->togo = priv->len;
-	if (!decrypted)
+	if (!decrypted && rawBlockMode)
 		priv->filename="keyvault_raw.bin";
+	else if (!decrypted)
+		priv->filename="keyvault_enc.bin";
 	else
 		priv->filename="keyvault.bin";
 	http->code = 200;
