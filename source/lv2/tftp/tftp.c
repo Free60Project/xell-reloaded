@@ -92,7 +92,7 @@ static int send_rrq(struct udp_pcb *pcb, ip_addr_t server_addr, uint16_t port,
   uint16_t buffer_len = 2 + strlen(file) + 1 + strlen(mode) + 1;
   if (block_size != 512) {
     buffer_len += strlen("blksize") + 1;
-    buffer_len += snprintf(NULL, 0, "%o", block_size) + 1;
+    buffer_len += snprintf(NULL, 0, "%i", block_size) + 1;
   }
 
   struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, buffer_len, PBUF_RAM);
@@ -118,7 +118,7 @@ static int send_rrq(struct udp_pcb *pcb, ip_addr_t server_addr, uint16_t port,
     strcpy((char*)d, "blksize");
     d += strlen("blksize") + 1;
 
-    d += sprintf((char*)d, "%o", block_size);
+    d += sprintf((char*)d, "%i", block_size);
   }
 
   if (udp_sendto(pcb, p, &server_addr, port) != 0) {
@@ -241,12 +241,14 @@ static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
   // Option acknowledgement.
   case TFTP_OPCODE_OACK: {
     if (!strcmp((char*)&d[2], "blksize")) {
-      uint32_t blksize = strtol((char*)&d[10], NULL, 8);
+      uint32_t blksize = strtol((char*)&d[10], NULL, 10);
       printf("tftp: server acknowledged blksize 0x%X\n", (int)blksize);
 
       // Use this block size from now on.
       tftp_state->block_size = blksize;
       tftp_state->state = TFTP_STATE_DATA_RECV;
+
+      send_ack(tftp_state->pcb, *addr, port, 0);
     }
   } break;
 
