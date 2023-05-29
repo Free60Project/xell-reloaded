@@ -35,11 +35,13 @@ int response_keyvault_process_request(struct http_state *http, const char *metho
 	if (strcmp(method, "GET"))
 		return 0;
 
+	rawBlockMode = 0;
+	decrypted = 0;
 	if (strcmp(url, "/KVRAW") && strcmp(url, "/KVRAW2") && strcmp(url, "/KV"))
 		return 0;
-	if (!(strcmp(url, "/KVRAW2") && !(strcmp(url, "/KV"))))
+	if (strcmp(url, "/KVRAW2") == 0)
 		rawBlockMode = 1;
-	if (strcmp(url, "/KV"))
+	if (strcmp(url, "/KV") == 0)
 		decrypted = 1;
 
 	http->response_priv = mem_malloc(sizeof(struct response_mem_priv_s));
@@ -50,7 +52,7 @@ int response_keyvault_process_request(struct http_state *http, const char *metho
 	int bytes_sz = (KV_FLASH_SIZE / sfc.page_sz) * sfc.page_sz_phys;
 
 	//priv->base = (void*) 0x80000200c8000000ULL;
-	if (sfc.initialized == SFCX_INITIALIZED && !rawBlockMode)
+	if (sfc.initialized == SFCX_INITIALIZED && rawBlockMode && !decrypted)
 		priv->base = (void*) mem_malloc(bytes_sz);
 	else
 		priv->base = (void*) mem_malloc(KV_FLASH_SIZE);
@@ -61,15 +63,15 @@ int response_keyvault_process_request(struct http_state *http, const char *metho
 	}
 
 	
-	if (sfc.initialized == SFCX_INITIALIZED && !rawBlockMode && !decrypted)
+	if (sfc.initialized == SFCX_INITIALIZED && rawBlockMode && !decrypted) // KVRAW2
 	{
 		int i = 0;
 		for (i = 0; i < (bytes_sz / sfc.page_sz_phys); i++)		
 			sfcx_read_page(priv->base + (i * sfc.page_sz_phys), KV_FLASH_SIZE + (i * sfc.page_sz), 1);		
 	}
-	else if (!decrypted)
+	else if (!decrypted) // KVRAW
 		xenon_get_logical_nand_data(priv->base, KV_FLASH_OFFSET, KV_FLASH_SIZE);
-	else
+	else // KV
 	{
 		if(kv_read(priv->base,0)!=0) 
 			if(kv_read(priv->base,1)!=0){ // Try decrypt with virtual cpukey 
@@ -83,13 +85,15 @@ int response_keyvault_process_request(struct http_state *http, const char *metho
 
 	priv->hdr_state = 0;
 	priv->ptr = 0;
-	if (sfc.initialized == SFCX_INITIALIZED && !rawBlockMode)
+	if (sfc.initialized == SFCX_INITIALIZED && rawBlockMode && !decrypted)
 		priv->len = bytes_sz;
 	else
 		priv->len = KV_FLASH_SIZE;
 	priv->togo = priv->len;
-	if (!decrypted)
+	if (!decrypted && rawBlockMode)
 		priv->filename="keyvault_raw.bin";
+	else if (!decrypted)
+		priv->filename="keyvault_enc.bin";
 	else
 		priv->filename="keyvault.bin";
 	http->code = 200;
