@@ -45,7 +45,8 @@
 			linux,boot-cpu;
 			reg = <0>;
 			ibm,ppc-interrupt-server#s = <0 1>;
-			timebase-frequency = <0x2FAF080>; // 50 MHz
+			timebase-frequency = <50000000>; /* 50 MHz */
+			clock-frequency = <3200000000>; /* 3.2GHz */
 			i-cache-size = <0x8000>;
 			i-cache-line-size = <0x80>;
 			d-cache-size = <0x8000>;
@@ -62,7 +63,8 @@
 			device_type = "cpu";
 			reg = <2>;
 			ibm,ppc-interrupt-server#s = <2 3>;
-			timebase-frequency = <0x2FAF080>;
+			timebase-frequency = <50000000>; /* 50 MHz */
+			clock-frequency = <3200000000>; /* 3.2GHz */
 			i-cache-size = <0x8000>;
 			i-cache-line-size = <0x80>;
 			d-cache-size = <0x8000>;
@@ -72,7 +74,8 @@
 			device_type = "cpu";
 			reg = <4>;
 			ibm,ppc-interrupt-server#s = <4 5>;
-			timebase-frequency = <0x2FAF080>;
+			timebase-frequency = <50000000>; /* 50 MHz */
+			clock-frequency = <3200000000>; /* 3.2GHz */
 			i-cache-size = <0x8000>;
 			i-cache-line-size = <0x80>;
 			d-cache-size = <0x8000>;
