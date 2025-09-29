@@ -18,7 +18,7 @@
 //#define FS_ISO9660
 #define FS_FAT
 //#define FS_EXT2FS
-//#define FS_XTAF
+#define FS_XTAF
 //#define FS_NTFS
 
 void mount_all_devices();
