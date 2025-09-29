@@ -119,6 +119,7 @@ int try_load_file(char *filename, int filetype) {
   printf("Trying %s...\r", filename);
 
   struct stat s;
+  memset(&s, 0, sizeof(struct stat));
   stat(filename, &s);
 
   long size = s.st_size;
