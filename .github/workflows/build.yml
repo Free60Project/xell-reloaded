@@ -16,6 +16,8 @@ jobs:
         echo DEVKITXENON=/usr/local/xenon >> $GITHUB_ENV
         echo /usr/local/xenon/bin >> $GITHUB_PATH
         echo /usr/local/xenon/usr/bin >> $GITHUB_PATH
+    - name: Prepare Git for build
+      run: git config --global --add safe.directory $GITHUB_WORKSPACE
     - name: Build
       run: make
     - name: Build (dist)
