@@ -260,7 +260,11 @@ static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 
     /* please don't overflow this. */
     console_clrline();
+<<<<<<< Updated upstream
     printf("tftp error %d: %s\n", (d[2] << 8) | d[3], d + 4);
+=======
+    printf("tftp error %d: %s\n\r", (d[2] << 8) | d[3], d + 4);
+>>>>>>> Stashed changes
     console_clrline();
   } break;
 
