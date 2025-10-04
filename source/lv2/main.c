@@ -27,6 +27,7 @@
 #include <elf/elf.h>
 #include <version.h>
 #include <byteswap.h>
+#include <netif/etharp.h>
 
 #include "asciiart.h"
 #include "config.h"
@@ -34,6 +35,23 @@
 #include "tftp/tftp.h"
 
 #include "log.h"
+
+// Check if there is an ARP entry for fallback_address - if not, flag it with fallback_address_up
+int check_host(ip_addr_t server_addr){
+  int rc = 0;
+  
+  // Send some ARP requests to the specified host
+  for(int probe = 0; probe <= 2; probe++){  
+    if(etharp_request(&netif, &server_addr) == ERR_OK){
+        rc = 0; 
+      } else{
+        rc = -1;
+        printf("TFTP: could not find ARP entry for fallback_address.\r");
+      }
+  }
+
+  return rc;
+}
 
 void do_asciiart()
 {
@@ -111,7 +129,7 @@ int main(){
 #ifdef SWIZZY_THEME
 	console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_ORANGE); // Orange text on black bg
 #elif defined XTUDO_THEME
-	console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_PINK); // Pink text on black bg
+	console_set_colors(CONSOLE_COLOR_WHITE,CONSOLE_COLOR_PINK); // Pink text on black bg
 #elif defined DEFAULT_THEME
 	console_set_colors(CONSOLE_COLOR_BLUE,CONSOLE_COLOR_WHITE); // White text on blue bg
 #else
@@ -210,25 +228,21 @@ int main(){
 	// mount_all_devices();
 	ip_addr_t fallback_address;
 	ip4_addr_set_u32(&fallback_address, 0xC0A8015A); // 192.168.1.90
+	//ip4_addr_set_u32(&fallback_address, 0xC0A80101); // 192.168.1.1
 
 	printf("\n * Looking for files on TFTP...\n\n");
-	int arp_timeout_count = 0;
 
 	for(;;){
 		tftp_loop(boot_server_name()); //less likely to find something... 
 		// your router must support switching tftp OR you have a pure layer 2 setup
 
-		// Stop trying the fallback_server after 3 tries ~30 seconds of no response.
-		if(arp_timeout_count <= 3){
+		// Check if there is an ARP entry for fallback_address. If not just search local media.
+		if(check_host(fallback_address) == 0){
 			// Primarily a developer feature, set fallback_address IP to your tftp server.
 			tftp_loop(fallback_address);
-			arp_timeout_count++;
-			if(arp_timeout_count == 3)
-				printf("Error! Exceeded retries for fallback server. Ensure the server is online with port 69 open.\n");
 		}
-
+		
 		fileloop();
-
 		console_clrline();
 	}
 

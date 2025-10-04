@@ -73,7 +73,7 @@ int send_ack(struct udp_pcb *pcb, ip_addr_t server_addr, uint16_t port, uint32_t
   *(uint16_t *)(d + 2) = block;
 
   if (udp_sendto(pcb, p, &server_addr, port)) {
-    printf("TFTP: Failed to send ACK packet.\n");
+    printf("TFTP: Failed to send ACK packet.\n\r");
     rc = -1;
   }
 
@@ -123,7 +123,7 @@ static int send_rrq(struct udp_pcb *pcb, ip_addr_t server_addr, uint16_t port,
 
   if (udp_sendto(pcb, p, &server_addr, port) != 0) {
     console_clrline();
-    printf("TFTP: Failed to send RRQ packet.\n");
+    printf("TFTP: Failed to send RRQ packet.\r");
     rc = -1;
   }
 
