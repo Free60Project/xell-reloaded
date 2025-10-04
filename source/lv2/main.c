@@ -115,7 +115,7 @@ int main(){
 #elif defined DEFAULT_THEME
 	console_set_colors(CONSOLE_COLOR_BLUE,CONSOLE_COLOR_WHITE); // White text on blue bg
 #else
-	console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_PINK); // Pink text on black bg
+	console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_GREEN); // Green text on black bg
 #endif
 	console_init();
 
@@ -206,10 +206,10 @@ int main(){
 	//			i = device_list_size;
 	//	}
 	//}
-	
+
 	// mount_all_devices();
 	ip_addr_t fallback_address;
-	ip4_addr_set_u32(&fallback_address, 0xC0A801FE); // 192.168.1.254
+	ip4_addr_set_u32(&fallback_address, 0xC0A8015A); // 192.168.1.90
 
 	printf("\n * Looking for files on TFTP...\n\n");
 	int arp_timeout_count = 0;
@@ -221,14 +221,14 @@ int main(){
 		// Stop trying the fallback_server after 3 tries ~30 seconds of no response.
 		if(arp_timeout_count <= TFTP_MAX_RETRIES){
 			// Primarily a developer feature, set fallback_address IP to your tftp server.
-			tftp_loop(fallback_address); 
+			tftp_loop(fallback_address);
 			arp_timeout_count++;
-			if(arp_timeout_count == TFTP_MAX_RETRIES) 
+			if(arp_timeout_count == TFTP_MAX_RETRIES)
 				printf("Error! Exceeded retries for fallback server. Ensure the server is online with port 69 open.\n");
 		}
 
 		fileloop();
-		
+
 		console_clrline();
 	}
 
