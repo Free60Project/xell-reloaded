@@ -20,7 +20,8 @@
 #include <network/network.h>
 #include <ppc/timebase.h>
 
-#define TFTP_MAX_RETRIES 2
+// +1 to support latent network links.
+#define TFTP_MAX_RETRIES 3
 
 #define TFTP_STATE_RRQ_SEND 0
 #define TFTP_STATE_DATA_RECV 1
@@ -77,6 +78,7 @@ int send_ack(struct udp_pcb *pcb, ip_addr_t server_addr, uint16_t port, uint32_t
     rc = -1;
   }
 
+  console_clrline();
   pbuf_free(p);
   return rc;
 }
@@ -120,13 +122,13 @@ static int send_rrq(struct udp_pcb *pcb, ip_addr_t server_addr, uint16_t port,
 
     d += sprintf((char*)d, "%i", block_size);
   }
-
+  
   if (udp_sendto(pcb, p, &server_addr, port) != 0) {
-    console_clrline();
     printf("TFTP: Failed to send RRQ packet.\n");
     rc = -1;
   }
 
+  console_clrline();
   pbuf_free(p);
   return rc;
 }
@@ -250,6 +252,7 @@ static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 
       send_ack(tftp_state->pcb, *addr, port, 0);
     }
+    console_clrline();
   } break;
 
   case TFTP_OPCODE_ERROR: {
