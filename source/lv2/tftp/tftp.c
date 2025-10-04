@@ -252,7 +252,6 @@ static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 
       send_ack(tftp_state->pcb, *addr, port, 0);
     }
-    console_clrline();
   } break;
 
   case TFTP_OPCODE_ERROR: {
@@ -262,6 +261,7 @@ static void tftp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     /* please don't overflow this. */
     console_clrline();
     printf("tftp error %d: %s\n", (d[2] << 8) | d[3], d + 4);
+    console_clrline();
   } break;
 
   default: {

@@ -219,11 +219,11 @@ int main(){
 		// your router must support switching tftp OR you have a pure layer 2 setup
 
 		// Stop trying the fallback_server after 3 tries ~30 seconds of no response.
-		if(arp_timeout_count <= TFTP_MAX_RETRIES){
+		if(arp_timeout_count <= 3){
 			// Primarily a developer feature, set fallback_address IP to your tftp server.
 			tftp_loop(fallback_address);
 			arp_timeout_count++;
-			if(arp_timeout_count == TFTP_MAX_RETRIES)
+			if(arp_timeout_count == 3)
 				printf("Error! Exceeded retries for fallback server. Ensure the server is online with port 69 open.\n");
 		}
 
