@@ -36,21 +36,27 @@
 
 #include "log.h"
 
-// Check if there is an ARP entry for fallback_address - if not, flag it with fallback_address_up
-int check_host(ip_addr_t server_addr){
-  int rc = 0;
-  
-  // Send some ARP requests to the specified host
-  for(int probe = 0; probe <= 2; probe++){  
-    if(etharp_request(&netif, &server_addr) == ERR_OK){
-        rc = 0; 
-      } else{
-        rc = -1;
-        printf("TFTP: could not find ARP entry for fallback_address.\r");
-      }
-  }
-
-  return rc;
+// Check if there is an ARP entry for fallback_address - if not, do not bother trying to communicate with the host.
+int check_host(ip_addr_t server_addr){	
+	int rc = 0;
+	struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, 4, PBUF_RAM);
+	
+	// Send an ARP request for fallback_address.
+	if(etharp_request(&netif, &server_addr) == ERR_OK){
+		// If it didn't fail then we should be able to try sending data to that address.
+		if(etharp_output(&netif, p, &server_addr) == ERR_OK){
+			rc = 0;
+		} else { // But we might get a network error even though the ARP was technically sent (no reply):
+			printf("TFTP: network error - make sure fallback_address is online.\n\r");
+			rc = -1;
+		}
+	} else{ // Otherwise potential hardware?: 
+		printf("TFTP: error sending ARP request, possible hardware issue.\n\r");
+		rc = -1;
+	}
+	
+	// ret 0 = all good, else something failed
+	return rc;
 }
 
 void do_asciiart()
@@ -228,7 +234,6 @@ int main(){
 	// mount_all_devices();
 	ip_addr_t fallback_address;
 	ip4_addr_set_u32(&fallback_address, 0xC0A8015A); // 192.168.1.90
-	//ip4_addr_set_u32(&fallback_address, 0xC0A80101); // 192.168.1.1
 
 	printf("\n * Looking for files on TFTP...\n\n");
 
@@ -240,8 +245,9 @@ int main(){
 		if(check_host(fallback_address) == 0){
 			// Primarily a developer feature, set fallback_address IP to your tftp server.
 			tftp_loop(fallback_address);
-		}
-		
+		} 
+
+		// This will run forever if the fallback_address is not reachable on the network.
 		fileloop();
 		console_clrline();
 	}
