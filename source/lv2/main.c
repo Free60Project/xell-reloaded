@@ -47,7 +47,7 @@ int check_host(ip_addr_t server_addr){
 		if(etharp_output(&netif, p, &server_addr) == ERR_OK){
 			rc = 0;
 		} else { // But we might get a network error even though the ARP was technically sent (no reply):
-			printf("TFTP: network error - make sure fallback_address is online.\n\r");
+			printf(" Network error - make sure fallback_address is online.\n\r");
 			rc = -1;
 		}
 	} else{ // Otherwise potential hardware?: 
