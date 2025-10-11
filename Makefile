@@ -31,9 +31,6 @@ all: $(foreach name,$(TARGETS),$(addprefix $(name).,build))
 
 .PHONY: clean %.build
 
-# This Makefile doesn't work in parallel mode
-.NOTPARALLEL:
-
 clean:
 	@echo Cleaning...
 	@$(MAKE) --no-print-directory -f Makefile_lv2.mk clean
@@ -76,7 +73,7 @@ xell-1f_cygnos_demon.elf xell-2f_cygnos_demon.elf: CYGNOS_DEF = -DCYGNOS
 %.elf: $(LV1_DIR)/%.lds $(OBJS)
 	@$(CC) -n -T $< $(LDFLAGS) -o $@ $(OBJS)
 
-stage2.elf32.gz: FORCE $(foreach name,$(TARGETS),$(addprefix $(name).,elf))
+stage2.elf32.gz: FORCE
 	@rm -f $@
 	@rm -rf $(OBJS)
 	@$(MAKE) --no-print-directory -f Makefile_lv2.mk
