@@ -275,7 +275,7 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 	//
 	void *irq_cntrl = (void*)0x8000020000050000;
 
-	if(0x7C == ld((void*)irq_cntrl + 2070))
+	if(0x7C == ld((void*)irq_cntrl + 0x2070))
 	{
 		printf(" * Attempting to catch all CPUs...\n");
 
