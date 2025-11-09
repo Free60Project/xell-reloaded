@@ -241,7 +241,6 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 
 	secondary_hold_addr = 0;
 
-#ifdef HACK_JTAG
 	//execption vector
 	int exc[] = {
 		EX_RESET, EX_MACHINE_CHECK, EX_DSI, EX_DATA_SEGMENT,
@@ -252,7 +251,6 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 	};
 
 	int i;
-#endif
 		
 	/* initialize BSS first. DO NOT INSERT CODE BEFORE THIS! */
 	unsigned char *p = (unsigned char*)bss_start;
@@ -268,9 +266,17 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 
 	printf("\nXeLL - First stage\n");
 
-	if(!wakeup_cpus)
+
+	//
+	// Have a look and see if thread 0 is started.
+	// If so, XeLL is starting on a JTAG or from
+	// the dashboard and can go down the catch
+	// codepath rather than the SoC init path
+	//
+	void *irq_cntrl = (void*)0x8000020000050000;
+
+	if(0x7C == ld((void*)irq_cntrl + 0x2070))
 	{
-#ifdef HACK_JTAG
 		printf(" * Attempting to catch all CPUs...\n");
 
 		// Place jumps in all of the exception vectors.
@@ -310,7 +316,6 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 			*(uint64_t*)(0x8000020000050068ULL + i * 0x1000) = 0x74;
 			while (*(volatile uint64_t*)(0x8000020000050050ULL + i * 0x1000) != 0x7C);
 		}
-#endif
 	}
 	else
 	{
@@ -336,9 +341,6 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 		std(sec_hold_addrs + 0x78, OCR_LAND_MAGIC);
 
 		// startup threads
-
-		void *irq_cntrl = (void*)0x8000020000050000;
-
 		std(irq_cntrl + 0x2070, 0x7c);
 		std(irq_cntrl + 0x2008, 0);
 		std(irq_cntrl + 0x2000, 4);
