@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include <debug.h>
+#include <input/input.h>
 #include <xenos/xenos.h>
 #include <console/console.h>
 #include <time/time.h>
@@ -232,7 +233,11 @@ int main(){
 	printf("\n * Looking for files...\n");
 	printf(" * At any time you can insert a USB or DVD and it will be detected and searched for boot files.\n");
 	printf(" * On a connected controller: 'y'=Halt, 'b'=Reboot\n");
-	printf(" * On a connected UART: 'h'=Halt, 'r'=Reboot\n");
+	printf(" * On a connected UART: 'h'=Halt, 'r'=Reboot\n\n");
+
+	// Initialize 360 controller - taken from XeLL kbootconf.c
+	struct controller_data_s ctrl;
+	struct controller_data_s old_ctrl;
 
 	for(;;){
 		if(boot_server_reachable){
