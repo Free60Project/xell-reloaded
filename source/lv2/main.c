@@ -69,20 +69,20 @@ void reset_timebase_task()
 void synchronize_timebases()
 {
 	xenon_thread_startup();
-	
+
 	std((void*)0x200611a0,0); // stop timebase
-	
+
 	int i;
 	for(i=1;i<6;++i){
 		xenon_run_thread_task(i,&stacks[i][0xff00],(void *)reset_timebase_task);
 		while(xenon_is_thread_task_running(i));
 	}
-	
+
 	reset_timebase_task(); // don't forget thread 0
-			
+
 	std((void*)0x200611a0,0x1ff); // restart timebase
 }
-	
+
 int main(){
 	LogInit();
 	int i;
@@ -92,7 +92,7 @@ int main(){
 
 	// linux needs this
 	synchronize_timebases();
-	
+
 	// irqs preinit (SMC related)
 	*(volatile uint32_t*)0xea00106c = 0x1000000;
 	*(volatile uint32_t*)0xea001064 = 0x10;
@@ -124,7 +124,7 @@ int main(){
 	do_asciiart();
 
 	//delay(3); //give the user a chance to see our splash screen <- network init should last long enough...
-	
+
 	xenon_sound_init();
 
 	xenon_make_it_faster(XENON_SPEED_FULL);
@@ -151,6 +151,26 @@ int main(){
 	httpd_start();
 	printf("success\n");
 
+	ip_addr_t fallback_address;
+	ip4_addr_set_u32(&fallback_address, 0xC0A8015A); // 192.168.1.90
+
+	// Check if the fallback TFTP server or bootp server (usually a router) is reachable on port 69.
+	// If not, we skip trying to download from it in the main loop. Relocating this code to this ifndef block
+	// also ensures that if networking is disabled at the config level, we don't try to check for reachability.
+	int fallback_reachable = is_tftp_server_reachable(fallback_address);
+	if (fallback_reachable) {
+		printf(" * Fallback TFTP server reachable!\n");
+	} else {
+		printf(" * Fallback TFTP server not reachable, skipping.\n");
+	}
+
+	int boot_server_reachable = is_tftp_server_reachable(boot_server_name());
+	if(boot_server_reachable) {
+		printf(" * Bootp server reachable!\n");
+	} else {
+		printf(" * Bootp server not reachable, skipping.\n");
+	}
+
 #endif
 
 	printf(" * usb init\n");
@@ -168,7 +188,7 @@ int main(){
 #endif
 
 	mount_all_devices();
-	
+
 	/*int device_list_size = */ // findDevices();
 
 	/* display some cpu info */
@@ -206,17 +226,22 @@ int main(){
 	//			i = device_list_size;
 	//	}
 	//}
-	
-	// mount_all_devices();
-	ip_addr_t fallback_address;
-	ip4_addr_set_u32(&fallback_address, 0xC0A8015A); // 192.168.1.90
 
-	printf("\n * Looking for files on TFTP...\n\n");
+	// mount_all_devices();
+
+	printf("\n * Looking for files...\n\n");
 	for(;;){
-		tftp_loop(boot_server_name()); //less likely to find something...
-		tftp_loop(fallback_address);
+		if(boot_server_reachable){
+			tftp_loop(boot_server_name()); // this will almost always not work
+		}
+
+		if (fallback_reachable) {
+			tftp_loop(fallback_address); // Try to boot from 192.168.1.99 if no bootp server
+		}
+
+		// Look for files on any other supported/configured filesystem.
 		fileloop();
-		
+
 		console_clrline();
 	}
 
