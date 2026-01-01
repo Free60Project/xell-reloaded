@@ -229,7 +229,11 @@ int main(){
 
 	// mount_all_devices();
 
-	printf("\n * Looking for files...\n\n");
+	printf("\n * Looking for files...\n");
+	printf(" * At any time you can insert a USB or DVD and it will be detected and searched for boot files.\n");
+	printf(" * On a connected controller: 'y'=Halt, 'b'=Reboot\n");
+	printf(" * On a connected UART: 'h'=Halt, 'r'=Reboot\n");
+
 	for(;;){
 		if(boot_server_reachable){
 			tftp_loop(boot_server_name()); // this will almost always not work
@@ -243,6 +247,35 @@ int main(){
 		fileloop();
 
 		console_clrline();
+
+		// Handle UART input
+		if(kbhit()){ // If a key has been pressed
+			switch(getch()){
+				case 'h':
+					xenon_smc_power_shutdown();
+					for(;;);
+					break;
+				case 'r':
+					xenon_smc_power_reboot();
+					for(;;);
+					break;
+			}
+		}
+
+		// Handle controller input
+		// Handle controller
+		if (get_controller_data(&ctrl, 0)) {
+			if (ctrl.y){
+				xenon_smc_power_shutdown();
+				for(;;);
+				break;
+			} if (ctrl.b){
+				xenon_smc_power_reboot();
+				for(;;);
+				break;
+			}
+			old_ctrl=ctrl;
+		}
 	}
 
 	return 0;
