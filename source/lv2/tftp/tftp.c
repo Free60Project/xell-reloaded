@@ -362,6 +362,49 @@ int do_tftp(void *target, int maxlen, struct ip_addr server, const char *file) {
   return (tftp_state.result < 0) ? tftp_state.result : tftp_state.data_offset;
 }
 
+int is_tftp_server_reachable(ip_addr_t server) {
+  tftp_state_t tftp_state;
+  memset(&tftp_state, 0, sizeof(tftp_state));
+
+  tftp_state.pcb = udp_new();
+  if (!tftp_state.pcb) {
+    return 0;
+  }
+
+  udp_bind(tftp_state.pcb, IP_ADDR_ANY, htons(0x1234));
+  udp_recv(tftp_state.pcb, tftp_recv, &tftp_state);
+
+  tftp_state.state = TFTP_STATE_RRQ_SEND;
+  tftp_state.start_time = mftb();
+  tftp_state.last_recv = mftb();
+  tftp_state.server_addr = server;
+  tftp_state.server_port = 0;
+  tftp_state.tries = 0;
+
+  // Send RRQ for a dummy file
+  int rc = send_rrq(tftp_state.pcb, server, 69, "dummy", "octet", 512);
+  if (rc != 0) {
+    udp_remove(tftp_state.pcb);
+    return 0;
+  }
+
+  uint64_t timeout = mftb() + 45000000ULL; // 1 second timeout (TB_CLOCK = 45MHz)
+
+  while (mftb() < timeout) {
+    network_poll();
+
+    if (tftp_state.state == TFTP_STATE_DATA_RECV || tftp_state.state == TFTP_STATE_ERROR) {
+      // Got a response
+      udp_remove(tftp_state.pcb);
+      return 1;
+    }
+  }
+
+  // Timeout, no response
+  udp_remove(tftp_state.pcb);
+  return 0;
+}
+
 int boot_tftp(ip_addr_t server_address, const char *tftp_bootfile,
               int filetype) {
   int ret;
