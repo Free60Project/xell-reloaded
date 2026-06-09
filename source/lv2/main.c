@@ -101,6 +101,10 @@ int main(){
 	*(volatile uint32_t*)0xea001064 = 0x10;
 	*(volatile uint32_t*)0xea00105c = 0xc000000;
 
+	// Reset the ROL state in case it is corrupted by
+	// ARGON_DATA JTAG, a rogue libxenon app, etc.
+	xenon_smc_set_led(0, 0);
+
 	xenon_smc_start_bootanim();
 
 	// flush console after each outputted char
