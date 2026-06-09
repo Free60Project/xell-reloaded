@@ -69,20 +69,42 @@ void split(char *buf, char **left, char **right, char delim)
 	}
 }
 
-int kboot_loadfile(char *filename, int type)
+int kboot_loadfile(char *filename, int type, char *kbootpath)
 {
 	int ret;
 
-	#ifndef NO_TFTP
-		/* If filename includes ':' it's seen as valid mountname */
-		if(strrchr(filename,':')!= NULL)
-			ret = try_load_file(filename,type);
-		else
-			ret = boot_tftp(boot_server_name(),filename,type);
-	#else
+	char relativepath[255] = {'\0'};
+
+	/* If filename includes ':' it's seen as valid mountname */
+	if(strrchr(filename,':')!= NULL)
+	{
 		ret = try_load_file(filename,type);
-	#endif
-		
+	}
+	else
+	{
+		// If a kboot path was provided, try loading the file
+		// from the same mount path as the kboot.conf
+		if(NULL != kbootpath)
+		{
+			// Copy the prefix (e.g. "uda0:/", "dvd0:/", and then concatenate
+			// the filename. If the filename begins with /, copy one less
+			// character from the prefix so we don't have a double slash
+			memcpy(relativepath, kbootpath, (filename[0] == '/') ? 5 : 6);
+			strncat(relativepath, filename, sizeof(relativepath) - 1);
+
+			ret = try_load_file(relativepath, type);
+		}
+
+#ifndef NO_TFTP
+		// If we failed to load the file, or a kbootpath wasn't provided,
+		// try to boot the provided filename from TFTP
+		if(ret || NULL == kbootpath)
+		{
+			ret = boot_tftp(boot_server_name(),filename,type);
+		}
+#endif
+	}
+
 	return ret;
 }
 
@@ -456,7 +478,7 @@ printf("\nTimeout.\n");
 return defaultchoice;
 }
 
-int try_kbootconf(void * addr, unsigned len){
+int try_kbootconf(void * addr, unsigned len, char *kbootpath){
     int ret;
     if (len > MAX_KBOOTCONF_SIZE)
     {
@@ -499,7 +521,7 @@ int try_kbootconf(void * addr, unsigned len){
     if (conf.kernels[boot_entry].initrd)
     {
         printf("Loading initrd ... ");
-        ret = kboot_loadfile(conf.kernels[boot_entry].initrd,TYPE_INITRD);
+        ret = kboot_loadfile(conf.kernels[boot_entry].initrd,TYPE_INITRD, kbootpath);
         if (ret < 0) {
 			printf("Failed!\nAborting!\n");
 			return -1;
@@ -509,7 +531,7 @@ int try_kbootconf(void * addr, unsigned len){
     }
 
     printf("Loading kernel ...\n");
-    ret = kboot_loadfile(conf.kernels[boot_entry].kernel,TYPE_ELF);
+    ret = kboot_loadfile(conf.kernels[boot_entry].kernel,TYPE_ELF, kbootpath);
     if (ret < 0)
 		printf("Failed!\n");
                 

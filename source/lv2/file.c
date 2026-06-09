@@ -34,7 +34,8 @@ const unsigned char elfhdr[] = {0x7f, 'E', 'L', 'F'};
 const unsigned char cpiohdr[] = {0x30, 0x37, 0x30, 0x37};
 const unsigned char kboothdr[] = "#KBOOTCONFIG";
 
-struct filenames filelist[] = {{"kboot.conf", TYPE_KBOOT},
+struct filenames filelist[] = {{"xell.conf", TYPE_KBOOT},
+                               {"kboot.conf", TYPE_KBOOT},
                                {"xenon.elf", TYPE_ELF},
                                {"xenon.z", TYPE_ELF},
                                {"vmlinux", TYPE_ELF},
@@ -52,7 +53,7 @@ void wait_and_cleanup_line() {
   console_clrline();
 }
 
-int launch_file(void *addr, unsigned len, int filetype) {
+int launch_file(void *addr, unsigned len, int filetype, char *filename) {
   int ret = 0;
   unsigned char *gzip_file;
   switch (filetype) {
@@ -90,7 +91,7 @@ int launch_file(void *addr, unsigned len, int filetype) {
     break;
   case TYPE_KBOOT:
     printf(" * Loading kboot.conf ...\n");
-    ret = try_kbootconf(addr, len);
+    ret = try_kbootconf(addr, len, filename);
     break;
   // This shit is broken!
   //     case TYPE_UPDXELL:
@@ -153,7 +154,7 @@ int try_load_file(char *filename, int filetype) {
     elf_setArgcArgv(argc, argv);
   }
 
-  ret = launch_file(buf, r, filetype);
+  ret = launch_file(buf, r, filetype, filename);
   
   fclose(f);
   free(buf);

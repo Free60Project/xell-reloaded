@@ -412,7 +412,7 @@ int boot_tftp(ip_addr_t server_address, const char *tftp_bootfile,
     elf_setArgcArgv(argc, argv);
   }
 
-  ret = launch_file(elf_raw, res, filetype);
+  ret = launch_file(elf_raw, res, filetype, NULL);
 
   free(elf_raw);
   return ret;

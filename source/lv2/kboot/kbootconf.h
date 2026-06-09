@@ -37,6 +37,6 @@ struct kbootconf {
 };
 
 int kbootconf_parse(void);
-int try_kbootconf(void * addr, unsigned len);
+int try_kbootconf(void * addr, unsigned len, char *kbootpath);
 
 #endif
