@@ -12,7 +12,7 @@
 //#define NO_PRINT_CONFIG         //commented to display config
 //#define NO_NETWORKING		//commented to actually use networking...
 //#define NO_DVD				//commented to actually use the DVD...
-#define NO_TFTP
+//#define NO_TFTP
 
 #ifdef NO_NETWORKING
    // If networking is disabled, TFTP must be disabled as well
