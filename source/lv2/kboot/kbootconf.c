@@ -121,7 +121,7 @@ void kboot_set_config(void)
            network_print_config();
         }
         
-        if(conf.videomode > VIDEO_MODE_AUTO && conf.videomode <= VIDEO_MODE_NTSC && oldvideomode != conf.videomode){
+        if(conf.videomode > VIDEO_MODE_AUTO && conf.videomode < VIDEO_MODE_COUNT && oldvideomode != conf.videomode){
             oldvideomode = conf.videomode;
             xenos_init(conf.videomode);
 	    console_init();
