@@ -19,6 +19,8 @@
 #include "httpd.h"
 #include "httpd_index.h"
 
+#include <console/console.h>
+
 unsigned char cpukey[0x10];
 unsigned char dvdkey[0x10];
 
@@ -117,6 +119,18 @@ int response_index_do_data(struct http_state *http)
 		}
 		else if(strcmp((char *) INDEX_HTML[i], "DVD_KEY")==0){
 			sprintf(buffer, "%016llX%016llX",ld(&dvdkey[0x0]),ld(&dvdkey[0x8]));
+		}
+		else if(strcmp((char *) INDEX_HTML[i], "BGCOLOR")==0){
+			sprintf(buffer, "#%02X%02X%02X",
+				(console_color[0] >> 8) & 0xFF,   // R
+				(console_color[0] >> 16) & 0xFF,  // G
+				(console_color[0] >> 24) & 0xFF); // B
+		}
+		else if(strcmp((char *) INDEX_HTML[i], "FGCOLOR")==0){
+			sprintf(buffer, "#%02X%02X%02X",
+				(console_color[1] >> 8) & 0xFF,   // R
+				(console_color[1] >> 16) & 0xFF,  // G
+				(console_color[1] >> 24) & 0xFF); // B
 		}
 		else{
 			sprintf(buffer,"%s",INDEX_HTML[i]);

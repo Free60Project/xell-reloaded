@@ -28,6 +28,7 @@ see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #include "tftp/tftp.h"
 #include "kbootconf.h"
 #include "file.h"
+#include "config.h"
 
 int boot_entry;
 char conf_buf[MAX_KBOOTCONF_SIZE];
@@ -108,15 +109,20 @@ int kboot_loadfile(char *filename, int type, char *kbootpath)
 }
 
 void kboot_set_config(void)
-{
-        
-        int setnetconfig = 0;
-        static int oldvideomode = -1;
-        ip_addr_t ipaddr, netmask, gateway, tftpserver;
-        
+{    
+	static int oldvideomode = -1;
+
+#ifndef NO_NETWORKING
+	int setnetconfig = 0;
+	ip_addr_t ipaddr, netmask, gateway;
+
+#ifndef NO_TFTP
+	ip_addr_t tftpserver;
+
 	if(conf.tftp_server != NULL)
 		if (ipaddr_aton(conf.tftp_server,&tftpserver))
 			kboot_tftp = conf.tftp_server;
+#endif
 
         /* Only reinit network if IPs dont match which got set by kboot on previous try*/
 	if(conf.ipaddress != NULL)
@@ -147,7 +153,8 @@ void kboot_set_config(void)
            netif_set_up(&netif);
            network_print_config();
         }
-        
+#endif
+
         if(conf.videomode > VIDEO_MODE_AUTO && conf.videomode < VIDEO_MODE_COUNT && oldvideomode != conf.videomode){
             oldvideomode = conf.videomode;
             xenos_init(conf.videomode);
@@ -458,7 +465,10 @@ int user_prompt(int defaultchoice, int max, int timeout) {
         redraw = 1;
         }
 
+#ifndef NO_NETWORKING
     network_poll();
+#endif
+
     usb_do_poll();
 
     if(old_default != defaultchoice)

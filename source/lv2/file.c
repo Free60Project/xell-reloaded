@@ -44,10 +44,12 @@ struct filenames filelist[] = {{"xell.conf", TYPE_KBOOT},
                                {NULL, TYPE_INVALID}};
 
 void wait_and_cleanup_line() {
+#ifndef NO_NETWORKING
   uint64_t t = mftb();
   while (tb_diff_msec(mftb(), t) < 200) { // yield to network
     network_poll();
   }
+#endif
   console_clrline();
 }
 
