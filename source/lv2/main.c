@@ -234,6 +234,7 @@ int main(){
 
 		fileloop();
 		console_clrline();
+		usb_do_poll(); // Refresh USB devices
 	}
 
 	return 0;
