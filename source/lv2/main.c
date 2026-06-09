@@ -197,7 +197,11 @@ int main(){
 	printf(FUSES);
 
 	print_cpu_dvd_keys();
+
+#ifndef NO_NETWORKING
 	network_print_config();
+#endif
+
 #endif
 	/* Stop logging and save it to first USB Device found that is writeable */
 	LogDeInit();
@@ -215,26 +219,29 @@ int main(){
 	//}
 	
 	// mount_all_devices();
-	ip_addr_t fallback_address;
-	ip4_addr_set_u32(&fallback_address, 0xC0A8015A); // 192.168.1.90
-
 #ifndef NO_TFTP
+	// Set the fallback TFTP address
+	ip_addr_t tftp_fallback_address;
+	ip4_addr_set_u32(&tftp_fallback_address, 0xC0A8015A); // 192.168.1.90
+
 	printf("\n * Looking for files on TFTP and local media...\n\n");
 #else
 	printf("\n * Looking for files on local media...\n\n");
 #endif
 
-   for(;;){
-      #ifndef NO_TFTP
-         //less likely to find something...
-		   tftp_loop(boot_server_name());
-		   tftp_loop(fallback_address);
-      #else
-         // If TFTP support isn't enabled
-         // the network still needs to be
-         // polled for the web interface 
-         network_poll();
-      #endif
+	for(;;){
+		#ifndef NO_TFTP
+			//less likely to find something...
+			tftp_loop(boot_server_name());
+			tftp_loop(tftp_fallback_address);
+		#else
+			#ifndef NO_NETWORKING
+			// If TFTP support isn't enabled but networking
+			// still is enabled, the network needs to be
+			// polled for the web interface to function correctly
+			network_poll();
+			#endif
+		#endif
 
 		fileloop();
 		console_clrline();

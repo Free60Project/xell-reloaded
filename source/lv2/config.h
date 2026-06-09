@@ -14,6 +14,11 @@
 //#define NO_DVD				//commented to actually use the DVD...
 //#define NO_TFTP
 
+#ifdef NO_NETWORKING
+   // If networking is disabled, TFTP must be disabled as well
+   #define NO_TFTP
+#endif
+
 /* Filesystem drivers */
 #define FS_ISO9660
 #define FS_FAT
