@@ -44,6 +44,7 @@ extern DISC_INTERFACE usb2mass_ops_2;
 #define PARTITION_TYPE_NTFS                 0x07 /* Windows NT NTFS */
 #define PARTITION_TYPE_WIN95_EXTENDED       0x0F /* Windows 95 extended partition */
 #define PARTITION_TYPE_LINUX                0x83 /* EXT2/3/4 */
+#define PARTITION_TYPE_ISOHYBRID			0xCD /* ISOHybrid MBR */
 
 #define PARTITION_STATUS_NONBOOTABLE        0x00 /* Non-bootable */
 #define PARTITION_STATUS_BOOTABLE           0x80 /* Bootable (active) */
@@ -242,13 +243,17 @@ static void AddPartition(sec_t sector, int device, int type, int *devnum) {
 #endif
 #ifdef FS_ISO9660
 		case T_ISO9660:
-			if (!ISO9660_Mount(mount, disc))
+			if (!ISO9660_Mount(mount, disc)) {
+				debug_printf("failed to mount ISO9660\n");
 				return;
+			}
 
 			name = (char *) ISO9660_GetVolumeLabel(mount);
 
 			if (name && name[0])
 				strcpy(part[device][*devnum].name, name);
+			else if (device != DEVICE_ATAPI)
+				strcpy(part[device][*devnum].name, "USB");
 			else
 				strcpy(part[device][*devnum].name, "DVD");
 			break;
@@ -355,8 +360,8 @@ static int FindPartitions(int device) {
 
 					// Read and validate the NTFS partition
 					if (interface->readSectors(part_lba, 1, &sector)) {
-						debug_printf("sector.boot.oem_id: 0x%x\n", sector.boot.oem_id);
-						debug_printf("NTFS_OEM_ID: 0x%x\n", NTFS_OEM_ID);
+						debug_printf("sector.boot.oem_id: 0x%llx\n", sector.boot.oem_id);
+						debug_printf("NTFS_OEM_ID: 0x%llx\n", NTFS_OEM_ID);
 						if (sector.boot.oem_id == NTFS_OEM_ID) {
 							debug_printf("Partition %i: Valid NTFS boot sector found\n", i + 1);
 							AddPartition(part_lba, device, T_NTFS, &devnum);
@@ -438,7 +443,24 @@ static int FindPartitions(int device) {
 					AddPartition(part_lba, device, T_EXT2, &devnum);
 					break;
 				}
-					// Ignore empty partitions
+					// ISOHybrid "partition"
+				case PARTITION_TYPE_ISOHYBRID:
+					debug_printf("Partition %i: Claims to be ISOHybrid\n", i + 1);
+					// Only accept it if it's the first one in the list
+					if (i == 0)
+					{
+						// Add the full device as if it's an ISO9660 medium
+						AddPartition(0, device, T_ISO9660, &devnum);
+						// Make sure we don't add any more partitions from this device to avoid problems
+						i = 4;
+						break;
+					}
+					else
+					{
+						debug_printf("Partition %i: ignoring late ISOHybrid\n", i + 1);
+					}
+					break;
+					// Ignore empty partitions (TODO check for different ISOHybrid)
 				case PARTITION_TYPE_EMPTY:
 					debug_printf("Partition %i: Claims to be empty\n", i + 1);
 					// Unknown or unsupported partition type
