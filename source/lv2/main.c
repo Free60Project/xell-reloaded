@@ -248,22 +248,24 @@ int main(){
 #endif
 
 	for(;;){
-		#ifndef NO_TFTP
-			//less likely to find something...
-			tftp_loop(boot_server_name());
-			tftp_loop(tftp_fallback_address);
-		#else
-			#ifndef NO_NETWORKING
-			// If TFTP support isn't enabled but networking
-			// still is enabled, the network needs to be
-			// polled for the web interface to function correctly
-			network_poll();
-			#endif
-		#endif
-
+		// Check for disk files first - this also includes if we find a kboot.conf
+		//  which can set the TFTP server name before we enter our first loop
 		fileloop();
+		
+#ifndef NO_TFTP
+		// Scan TFTP, using a fallback address for a server
+		tftp_loop(boot_server_name(&tftp_fallback_address));
+#else
+#ifndef NO_NETWORKING
+		// If TFTP support isn't enabled but networking
+		// still is enabled, the network needs to be
+		// polled for the web interface to function correctly
+		network_poll();
+#endif // NO_NETWORKING
+#endif // NO_TFTP
+
 		console_clrline();
-		usb_do_poll(); // Refresh USB devices
+		usb_do_poll(); // Refresh USB devices to find new drives to mount
 	}
 
 	return 0;

@@ -190,6 +190,10 @@ void fileloop() {
 }
 
 void tftp_loop(ip_addr_t server) {
+  // Don't run the TFTP loop if we don't have a network link
+  if (!network_link_up())
+    return;
+
   int i = 0;
   do {
     if ((filelist[i].filetype == TYPE_UPDXELL ||

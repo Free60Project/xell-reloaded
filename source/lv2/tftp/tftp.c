@@ -452,17 +452,21 @@ extern int boot_tftp_url(const char *url) {
   return boot_tftp(server_address, bootfile, TYPE_ELF);
 }
 
-ip_addr_t boot_server_name() {
+ip_addr_t boot_server_name(ip_addr_t *fallback_address) {
   ip_addr_t ret;
   if (kboot_tftp && kboot_tftp[0] && ipaddr_aton(kboot_tftp, &ret)) {
     return ret;
   }
+
+  // Set fallback address for if there's no DHCP
+  ret = *fallback_address;
 
   if (netif_dhcp_data(&netif)) {
     // DHCP server.
     if (netif_dhcp_data(&netif)->server_ip_addr.addr != 0x00000000) {
       return netif_dhcp_data(&netif)->server_ip_addr;
     } else if (netif.gw.addr != 0x00000000) {
+      // Use the gateway IP as a last-ditch effort
       return netif.gw;
     }
   }
