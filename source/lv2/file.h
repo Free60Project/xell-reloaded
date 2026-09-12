@@ -22,4 +22,4 @@ void wait_and_cleanup_line();
 int launch_file(void * addr, unsigned len, int filetype, char *filename);
 int try_load_file(char *filename, int filetype);
 void fileloop();
-void tftp_loop();
+void tftp_loop(ip_addr_t server);
