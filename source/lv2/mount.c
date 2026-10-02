@@ -578,9 +578,7 @@ static int FindPartitions(int device) {
                 break;
             }
 			if(!strncmp(sector.partEntry[i].type,"Apple",5)) {
-                          //If it's FAT, it's on an APPLE_HFS partition. Otherwise, it isn't supported, but
-                          //we'll test for it anyways just in case!
-                            debug_printf("Possibly a supported filesystem. Let's check it out!\n");
+                            debug_printf("Possibly a supported filesystem.\n");
                             curSector = sector.partEntry[i].startBlock*blockSize /physSectorSize;
                             i = (sector.partEntry[i].startBlock * blockSize % physSectorSize)/512;
 
