@@ -51,6 +51,7 @@ extern DISC_INTERFACE usb2mass_ops_2;
 
 #define MBR_SIGNATURE                       (0x55AA)
 #define EBR_SIGNATURE                       (0x55AA)
+#define APM_SIGNATURE 						(0x4552)
 
 #define BPB_FAT16_fileSysType  0x36
 #define BPB_FAT32_fileSysType  0x52
@@ -82,6 +83,52 @@ typedef struct _MASTER_BOOT_RECORD {
 	PARTITION_RECORD partitions[4]; /* 4 primary partitions */
 	u16 signature; /* MBR signature; 0xAA55 */
 } __attribute__((__packed__)) MASTER_BOOT_RECORD;
+
+/**
+ * APM Drive Descriptor - Apple Partition Map's header
+ */
+typedef struct {
+	u16 sig; //A signature that ensures that this is an APM. 0x4552
+	u16 blockSize; //size of a block in bytes
+	u32 numBlocks; //the number of blocks in drive
+	u16 DevType;
+	u16 DevID;
+	u32 DevData;
+	u16 numDrvDesc;
+	u64 drvDescOne;
+	u16 moreDrv[242];
+
+
+} __attribute__((__packed__)) APM_DRIVE_DESCRIPTOR;
+/**
+ * APM Partition Entry - Apple Partition Map's descriptor for a partition.
+ * The Partition Map itself is also considered a partition, so the first partition
+ * will be the map.
+ */
+typedef struct {
+	u16 sig; //Again, a signature. This time it is not required to be filled out.
+	u16 reserved0;
+	u32 numParts; //The number of partitions in the whole Table. Yes, every partition entry has that.
+	u32 startBlock; //The starting block of this partition
+	u32 partSize; //The size of this partition in sectors.
+	char name[32]; //The name of this partition.
+	char type[32]; //The type of this partition. This will be useful in maybe gleaning if it's FAT32
+	//Pretty much everything below here except status is unneeded for our purposes. We're not reading from HFS+ or directly booting MacOS
+	u32 startBlockData; //Starting block of the data area of this partition. I'd assume this is for HFS
+	u32 dataSize; //Size of the data area of the partition in sectors.
+	u32 status;
+	u32 startBlockBoot; //starting sector of boot code. Unneeded for our purposes.
+	u32 sizeBootCode; //size of boot code but in bytes not sectors.
+	u32 addrBootCode; //address of the bootloaer code.
+	u32 reserved1;
+	u32 bootCodeEntry; //entry point of bootcode.
+	u32 reserved2;
+	u32 bootCodeChksum;
+	u8 processorType[16];
+	u8 reserved3[376];
+
+} __attribute__((__packed__)) APM_PARTITION_ENTRY;
+
 
 /**
  * struct BIOS_PARAMETER_BLOCK - BIOS parameter block (bpb) structure.
@@ -157,7 +204,6 @@ typedef struct {
 #else
 #define debug_printf(fmt, args...)
 #endif
-
 enum {
 	DEVICE_USB_0, // usb
 	DEVICE_USB_1, // usb
@@ -275,6 +321,8 @@ static void AddPartition(sec_t sector, int device, int type, int *devnum) {
 static int FindPartitions(int device) {
 	int i;
 	int devnum = 0;
+        // technically not a physical sector size, but it's the amount that's given by readSectors
+        sec_t physSectorSize = 512;
 
 	// clear list
 	for (i = 0; i < MAX_DEVICES; i++) {
@@ -290,6 +338,7 @@ static int FindPartitions(int device) {
 	switch(device){
 		case DEVICE_ATAPI:
 			interface = (DISC_INTERFACE *) & xenon_atapi_ops;
+                        physSectorSize = 2048;
 		break;		
 		case DEVICE_ATA:
 		interface = (DISC_INTERFACE *) & xenon_ata_ops;
@@ -307,10 +356,12 @@ static int FindPartitions(int device) {
 		default:
 			return -1;
 	}
-		 
 
+	//MBR related Variables
 	MASTER_BOOT_RECORD mbr;
 	PARTITION_RECORD *partition = NULL;
+
+
 	devnum = 0;
 	sec_t part_lba = 0;
 
@@ -319,6 +370,8 @@ static int FindPartitions(int device) {
 		MASTER_BOOT_RECORD mbr;
 		EXTENDED_BOOT_RECORD ebr;
 		NTFS_BOOT_SECTOR boot;
+		APM_DRIVE_DESCRIPTOR apm;
+		APM_PARTITION_ENTRY partEntry[BYTES_PER_SECTOR/512];
 	} sector;
 
 	if(device == DEVICE_ATAPI){
@@ -333,7 +386,8 @@ static int FindPartitions(int device) {
 	}
 
 	// If this is the devices master boot record
-	debug_printf("0x%x\n", sector.mbr.signature);
+	debug_printf("MBR Signature: 0x%x\n", sector.mbr.signature);
+	debug_printf("APM Signature: 0x%x\n", sector.apm.sig);
 	if (sector.mbr.signature == MBR_SIGNATURE) {
 		memcpy(&mbr, &sector, sizeof (MASTER_BOOT_RECORD));
 		debug_printf("Valid Master Boot Record found\n");
@@ -494,10 +548,89 @@ static int FindPartitions(int device) {
 				}
 			}
 		}
+	} else if(sector.apm.sig == APM_SIGNATURE){
+		//It's an Apple Partition Map! Let's grab the partitions!
+		debug_printf("Valid Apple Partition Map found\n");
+		u16 blockSize = sector.apm.blockSize;
+		u32 numBlocks = sector.apm.numBlocks;
+		u8 numParts = 10; //random number. Will be changed when read.
+		sec_t lastSector = 0;
+		if(blockSize % 512 != 0){
+			printf("Apple Partition Map Block size is not a multiple of 512 bytes.\n");
+			numParts = 0; //that should prevent the for loop from starting.
+		}
+		for(u8 curBlock = 1;curBlock < numParts; curBlock++){
+			sec_t curSector = curBlock * blockSize / physSectorSize;
+			u8 i = (curBlock * blockSize % physSectorSize)/512;
+                        if(i >= physSectorSize/512){
+                          printf ("Somehow, we managed to get an index larger than the size of the data given by readSectors()\n");
+                          printf ("Giving up before we start reading into unmanaged memory\n");
+                          break;
+                        }
+			if(curSector != lastSector){
+				lastSector = curSector;
+				interface->readSectors(curSector,1,&sector);
+			}
+			numParts = sector.partEntry[i].numParts;
+			debug_printf("Found %s Partition: %s",sector.partEntry[i].type,sector.partEntry[i].name);
+            if(sector.partEntry[i].startBlock > numBlocks){
+                printf("startBlock of partition is greater than numBlocks. Giving up before we screw up.\n");
+                break;
+            }
+			if(!strncmp(sector.partEntry[i].type,"Apple",5)) {
+                          //If it's FAT, it's on an APPLE_HFS partition. Otherwise, it isn't supported, but
+                          //we'll test for it anyways just in case!
+                            debug_printf("Possibly a supported filesystem. Let's check it out!\n");
+                            curSector = sector.partEntry[i].startBlock*blockSize /physSectorSize;
+                            i = (sector.partEntry[i].startBlock * blockSize % physSectorSize)/512;
+
+                            interface->readSectors(curSector,1,&sector);
+                            lastSector = curSector;
+
+                            //Since apple isn't kind enough to tell us whether its FAT or HFS, we're gonna have to figure it out ourselves!
+                           if(!memcmp(sector.buffer + 512*i + BPB_FAT16_fileSysType, FAT_SIG,
+						sizeof (FAT_SIG)) || !memcmp(sector.buffer + 512*i
+						+ BPB_FAT32_fileSysType, FAT_SIG, sizeof (FAT_SIG))){
+                              debug_printf("FAT Partition found!\n");
+
+                              //curSector * physSectorSize / 512 should turn the physical sector into a multiple of 512.
+                              //Now all we have to do is add i
+                              AddPartition(curSector * physSectorSize / 512 + i
+                                            , device, T_FAT, &devnum);
+                          } else{
+                            //try NTFS then ext
+                            NTFS_BOOT_SECTOR boottest;
+                            memcpy(&boottest,sector.buffer + 512*i,sizeof(boottest));
+                            if (boottest.oem_id == NTFS_OEM_ID) {
+							    debug_printf("Valid NTFS boot sector found!\n");
+							    AddPartition(curSector * physSectorSize / 512 + i, device, T_NTFS, &devnum);
+						    }
+                            else{
+                                debug_printf("Trying : ext partition\n");
+			                    AddPartition(curSector * physSectorSize / 512 + i, device, T_EXT2, &devnum);
+                            }
+                          }
+
+
+             } else{
+                //Either we're on the wrong block entirely, it's a BEOS file system, or it's Tivo's Media File system
+                // Just in case, I'll just say unsupported partition type
+                printf("Unsupported Partition type: %s\n",sector.partEntry[i].type);
+                printf("If this is gibberish, we did something wrong\n");
+                }
+
+		}
+		//And thus, with this, we can continue on.
+
+
+
+
+
+
 	}
 	if (devnum == 0) // it is assumed this device has no master boot record or no partitions found
 	{
-		debug_printf("No Master Boot Record was found or no partitions found!\n");
+		debug_printf("No Master Boot Record or Apple Partition Map was found or no partitions found!\n");
 
 		// As a last-ditched effort, search the first 64 sectors of the device for stray NTFS/FAT partitions
 		for (i = 0; i < 64; i++) {
