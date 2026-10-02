@@ -577,7 +577,8 @@ static int FindPartitions(int device) {
                 printf("startBlock of partition is greater than numBlocks. Giving up before we screw up.\n");
                 break;
             }
-			if(!strncmp(sector.partEntry[i].type,"Apple",5)) {
+			if(strncmp(sector.partEntry[i].type,"Apple_Boot",10) && strncmp(sector.partEntry[i].type,"Apple_Driver",12)
+&& strncmp(sector.partEntry[i].type,"Apple_Driver",12) && strncmp(sector.partEntry[i].type,"Apple_Free",10) && strncmp(sector.partEntry[i].type,"Apple_Extra",11)) {
                             debug_printf("Possibly a supported filesystem.\n");
                             curSector = sector.partEntry[i].startBlock*blockSize /physSectorSize;
                             i = (sector.partEntry[i].startBlock * blockSize % physSectorSize)/512;
