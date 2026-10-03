@@ -69,7 +69,7 @@ void split(char *buf, char **left, char **right, char delim)
 	}
 }
 
-int kboot_loadfile(char *filename, int type, char *kbootpath)
+int kboot_loadfile(char *filename, int type, char *kbootpath, char* parameters, int numParams)
 {
 	int ret = 0;
 
@@ -78,7 +78,7 @@ int kboot_loadfile(char *filename, int type, char *kbootpath)
 	/* If filename includes ':' it's seen as valid mountname */
 	if(strrchr(filename,':')!= NULL)
 	{
-		ret = try_load_file(filename,type);
+		ret = try_load_file(filename,type, parameters, numParams);
 	}
 	else
 	{
@@ -92,7 +92,7 @@ int kboot_loadfile(char *filename, int type, char *kbootpath)
 			memcpy(relativepath, kbootpath, (filename[0] == '/') ? 5 : 6);
 			strncat(relativepath, filename, sizeof(relativepath) - 1);
 
-			ret = try_load_file(relativepath, type);
+			ret = try_load_file(relativepath, type, parameters, numParams);
 		}
 
 #ifndef NO_TFTP
@@ -100,7 +100,7 @@ int kboot_loadfile(char *filename, int type, char *kbootpath)
 		// try to boot the provided filename from TFTP
 		if(ret || NULL == kbootpath)
 		{
-			ret = boot_tftp(boot_server_name(),filename,type);
+			ret = boot_tftp(boot_server_name(NULL),filename,type);
 		}
 #endif
 	}
@@ -265,6 +265,7 @@ int kbootconf_parse(void)
 			char *root = NULL;
 			char *initrd = NULL;
 			tmpbuf[0] = 0;
+            int numParams = 0;
 			/* split commandline arguments and extract the useful bits */
 			while (*p) {
 				char *spc = strchr(p, ' ');
@@ -276,7 +277,7 @@ int kbootconf_parse(void)
 					p = spc;
 					continue;
 				}
-
+                numParams++;
 				char *arg, *val;
 				split(p, &arg, &val, '=');
 				if (!val) {
@@ -304,6 +305,7 @@ int kbootconf_parse(void)
 			// UGLY: tack on initrd and root onto tmpbuf, then copy it entirely
 			// on top of the original buffer (avoids having to deal with malloc)
 			conf.kernels[conf.num_kernels].parameters = buf;
+            conf.kernels[conf.num_kernels].numParams = numParams;
 			if (initrd) {
 				strlcpy(tmpbuf+len, initrd, sizeof(tmpbuf)-len);
 				conf.kernels[conf.num_kernels].initrd = buf + len;
@@ -528,7 +530,7 @@ int try_kbootconf(void * addr, unsigned len, char *kbootpath){
     if (conf.kernels[boot_entry].initrd)
     {
         printf("Loading initrd ... ");
-        ret = kboot_loadfile(conf.kernels[boot_entry].initrd,TYPE_INITRD, kbootpath);
+        ret = kboot_loadfile(conf.kernels[boot_entry].initrd,TYPE_INITRD, kbootpath, NULL, 0);
         if (ret < 0) {
 			printf("Failed!\nAborting!\n");
 			return -1;
@@ -538,7 +540,7 @@ int try_kbootconf(void * addr, unsigned len, char *kbootpath){
     }
 
     printf("Loading kernel ...\n");
-    ret = kboot_loadfile(conf.kernels[boot_entry].kernel,TYPE_ELF, kbootpath);
+    ret = kboot_loadfile(conf.kernels[boot_entry].kernel,TYPE_ELF, kbootpath, conf.kernels[boot_entry].parameters, conf.kernels[boot_entry].numParams);
     if (ret < 0)
 		printf("Failed!\n");
                 
