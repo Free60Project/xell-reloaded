@@ -553,13 +553,13 @@ static int FindPartitions(int device) {
 		debug_printf("Valid Apple Partition Map found\n");
 		u16 blockSize = sector.apm.blockSize;
 		u32 numBlocks = sector.apm.numBlocks;
-		u8 numParts = 10; //random number. Will be changed when read.
+		u32 numParts = 10; //random number. Will be changed when read.
 		sec_t lastSector = 0;
 		if(blockSize % 512 != 0){
 			printf("Apple Partition Map Block size is not a multiple of 512 bytes.\n");
 			numParts = 0; //that should prevent the for loop from starting.
 		}
-		for(u8 curBlock = 1;curBlock < numParts; curBlock++){
+		for(u32 curBlock = 1;curBlock < numParts; curBlock++){
 			sec_t curSector = curBlock * blockSize / physSectorSize;
 			u8 i = (curBlock * blockSize % physSectorSize)/512;
                         if(i >= physSectorSize/512){
