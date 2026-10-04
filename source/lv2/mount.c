@@ -614,8 +614,10 @@ static int FindPartitions(int device) {
              } else{
                 //Either we're on the wrong block entirely, it's a BEOS file system, or it's Tivo's Media File system
                 // Just in case, I'll just say unsupported partition type
-                printf("Unsupported Partition type: %s\n",sector.partEntry[i].type);
-                printf("If this is gibberish, we did something wrong\n");
+				if(strncmp(sector.partEntry[i].type,"Apple_Free",10)){
+					printf("Unsupported Partition type: %s\n",sector.partEntry[i].type);
+                	printf("If this is gibberish, we did something wrong\n");
+				}
                 }
 
 		}
