@@ -100,7 +100,7 @@ int kboot_loadfile(char *filename, int type, char *kbootpath)
 		// try to boot the provided filename from TFTP
 		if(ret || NULL == kbootpath)
 		{
-			ret = boot_tftp(boot_server_name(),filename,type);
+			ret = boot_tftp(boot_server_name(NULL),filename,type);
 		}
 #endif
 	}
