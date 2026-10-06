@@ -195,9 +195,12 @@ int main(){
 	/* display some cpu info */
 	consoleType = xenon_get_console_type();
 
-	printf("\n * Console Type: %s (PVR %08x)\n\n",
+	printf("\n * Console Type: %s (PVR %08x)\n",
 			 (consoleType >= 0 && consoleType <= 7) ? consoleNames[consoleType] : "Unknown",
 			 mfspr(287));
+	if (xenon_config_is_softmodded())
+		printf(" * Peer Pressure softmod installed!\n");
+	printf("\n");
 
 #ifndef NO_PRINT_CONFIG
 	printf(" * FUSES - write them down and keep them safe:\n");

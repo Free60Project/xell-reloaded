@@ -16,6 +16,7 @@ used for zlib support ...
 #include <sys/iosupport.h>
 #include <usb/usbmain.h>
 #include <xb360/xb360.h>
+#include <xenon_nand/xenon_config.h>
 #include <xenon_nand/xenon_sfcx.h>
 #include <xetypes.h>
 
@@ -179,6 +180,13 @@ void fileloop() {
           wait_and_cleanup_line();
           printf("MMC Console Detected! Skipping %s...\r", filepath);
           j++;
+        } else if ((filelist[j].filetype == TYPE_UPDXELL ||
+                    filelist[j].filetype == TYPE_NANDIMAGE) &&
+                    xenon_config_is_softmodded() &&
+                    filelist[j].filename[0] != 'u') { // PP replaces with funny characters
+          // skip over even trying these if PP's "safety" is engaged
+          // avoids sending junk over TFTP, saves time
+          j++;
         } else {
           try_load_file(filepath, filelist[j].filetype);
           j++;
@@ -202,6 +210,13 @@ void tftp_loop(ip_addr_t server) {
       wait_and_cleanup_line();
       printf("Skipping TFTP %s:%s... MMC Detected!\r", ipaddr_ntoa(&server),
              filelist[i].filename);
+      i++;
+    } else if ((filelist[i].filetype == TYPE_UPDXELL ||
+                filelist[i].filetype == TYPE_NANDIMAGE) &&
+                xenon_config_is_softmodded() &&
+                filelist[i].filename[0] != 'u') { // PP replaces with funny characters
+      // skip over even trying these if PP's "safety" is engaged
+      // avoids sending junk over TFTP, saves time
       i++;
     } else {
       wait_and_cleanup_line();
