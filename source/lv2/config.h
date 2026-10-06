@@ -26,6 +26,9 @@
 #define FS_XTAF
 //#define FS_NTFS
 
+/* Fallback address for TFTP */
+#define TFTP_FALLBACK_ADDRESS 0xC0A8015A // 192.168.1.90
+
 void mount_all_devices();
 
 int findDevices();

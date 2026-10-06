@@ -452,14 +452,14 @@ extern int boot_tftp_url(const char *url) {
   return boot_tftp(server_address, bootfile, TYPE_ELF);
 }
 
-ip_addr_t boot_server_name(ip_addr_t *fallback_address) {
+ip_addr_t boot_server_name() {
   ip_addr_t ret;
   if (kboot_tftp && kboot_tftp[0] && ipaddr_aton(kboot_tftp, &ret)) {
     return ret;
   }
 
   // Set fallback address for if there's no DHCP
-  ret = *fallback_address;
+  ip4_addr_set_u32(&ret, TFTP_FALLBACK_ADDRESS);
 
   if (netif_dhcp_data(&netif)) {
     // DHCP server.
