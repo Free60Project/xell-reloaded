@@ -238,10 +238,6 @@ int main(){
 	
 	// mount_all_devices();
 #ifndef NO_TFTP
-	// Set the fallback TFTP address
-	ip_addr_t tftp_fallback_address;
-	ip4_addr_set_u32(&tftp_fallback_address, 0xC0A8015A); // 192.168.1.90
-
 	printf("\n * Looking for files on TFTP and local media...\n\n");
 #else
 	printf("\n * Looking for files on local media...\n\n");
@@ -253,8 +249,8 @@ int main(){
 		fileloop();
 		
 #ifndef NO_TFTP
-		// Scan TFTP, using a fallback address for a server
-		tftp_loop(boot_server_name(&tftp_fallback_address));
+		// Scan TFTP
+		tftp_loop(boot_server_name());
 #else
 #ifndef NO_NETWORKING
 		// If TFTP support isn't enabled but networking
