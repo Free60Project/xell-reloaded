@@ -71,12 +71,11 @@ int getchar(void)
 	return (*(volatile uint32_t*)0x80000200ea001010) >> 24;
 }
 
+char is_cygnos = 0;
 int putchar(int c)
 {
-#ifndef CYGNOS
-	if (c == '\n')
+	if (c == '\n' && !is_cygnos)
 		putch('\r');
-#endif
 	putch(c);
 	return 0;
 }
@@ -250,13 +249,16 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 	unsigned char *p = (unsigned char*)bss_start;
 	memset(p, 0, bss_end - bss_start);
 
-#ifdef CYGNOS
-	/* set UART to 38400, 8, N, 1 */
-	*(volatile uint32_t*)0x80000200ea00101c = 0xae010000;
-#else
-	/* set UART to 115400, 8, N, 1 */
-	*(volatile uint32_t*)0x80000200ea00101c = 0xe6010000;
-#endif
+	// Check the flag in the NAND to see if we need to use slower UART
+	// for Cygnos, DemoN, etc. This is the flag checked by freeBOOT on JTAG images
+	unsigned char options = *(unsigned char *)(0x80000200C8000048 + 5);
+	is_cygnos = (options != 0xFF && (options & 1));
+	if (is_cygnos)
+		/* set UART to 38400, 8, N, 1 */
+		*(volatile uint32_t*)0x80000200ea00101c = 0xae010000;
+	else
+		/* set UART to 115400, 8, N, 1 */
+		*(volatile uint32_t*)0x80000200ea00101c = 0xe6010000;
 
 	printf("\nXeLL - First stage\n");
 
