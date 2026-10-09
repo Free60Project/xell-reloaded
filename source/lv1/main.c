@@ -28,12 +28,6 @@ extern char other_threads_startup[], other_threads_startup_end[];
 volatile unsigned long secondary_hold_addr = 1;
 volatile int processors_online[6] = {1};
 
-#ifdef HACK_JTAG
-volatile long wakeup_cpus = 0;
-#else
-volatile long wakeup_cpus = 1;
-#endif
-
 void jump(unsigned long dtc, unsigned long kernel_base, unsigned long null, unsigned long reladdr, unsigned long hrmor);
 
 static inline uint64_t ld(volatile void *addr)
@@ -77,12 +71,11 @@ int getchar(void)
 	return (*(volatile uint32_t*)0x80000200ea001010) >> 24;
 }
 
+char is_cygnos = 0;
 int putchar(int c)
 {
-#ifndef CYGNOS
-	if (c == '\n')
+	if (c == '\n' && !is_cygnos)
 		putch('\r');
-#endif
 	putch(c);
 	return 0;
 }
@@ -256,13 +249,16 @@ int start(int pir, unsigned long hrmor, unsigned long pvr)
 	unsigned char *p = (unsigned char*)bss_start;
 	memset(p, 0, bss_end - bss_start);
 
-#ifdef CYGNOS
-	/* set UART to 38400, 8, N, 1 */
-	*(volatile uint32_t*)0x80000200ea00101c = 0xae010000;
-#else
-	/* set UART to 115400, 8, N, 1 */
-	*(volatile uint32_t*)0x80000200ea00101c = 0xe6010000;
-#endif
+	// Check the flag in the NAND to see if we need to use slower UART
+	// for Cygnos, DemoN, etc. This is the flag checked by freeBOOT on JTAG images
+	unsigned char options = *(unsigned char *)(0x80000200C8000048 + 5);
+	is_cygnos = (options != 0xFF && (options & 1));
+	if (is_cygnos)
+		/* set UART to 38400, 8, N, 1 */
+		*(volatile uint32_t*)0x80000200ea00101c = 0xae010000;
+	else
+		/* set UART to 115400, 8, N, 1 */
+		*(volatile uint32_t*)0x80000200ea00101c = 0xe6010000;
 
 	printf("\nXeLL - First stage\n");
 
