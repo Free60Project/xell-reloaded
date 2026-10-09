@@ -246,6 +246,7 @@ relocate_if_necessary:
 	// Detect if we're running from our correct base address and relocate if not
 	// (Only works if we're loaded at a 64KB page boundary)
 	mflr	%r3				// The LR will be in stage1 here
+	clrldi	%r3, %r3, 32	// Clear the upper 32-bits just in case
 	srwi	%r3, %r3, 16
 	#if GCC_VERSION >= 40900
 		cmplwi	%r3, _start@high
@@ -254,15 +255,19 @@ relocate_if_necessary:
 	#endif
 	beqlr					// We're fine, no need to relocate
 
+	// 0x8000_0000_0000_0000 = ignore HRMOR
+	li		%r6, -1
 	// Relocation loop
 	// r3 = source, r4 = target, r5 = size >> 3
 	slwi	%r3, %r3, 16
+	rldimi	%r3, %r6, 63, 0
 	subi	%r3, %r3, 0x8
 	#if GCC_VERSION >= 40900
 		lis		%r4, _start@high
 	#else
 		lis		%r4, _start@h
 	#endif
+	rldimi	%r4, %r6, 63, 0
 	subi	%r4, %r4, 0x8
 	li		%r5, 0
 	ori		%r5, %r5, 0x8000	// 0x40000 / 256KB
@@ -278,5 +283,6 @@ copy_loop:
 	#else
 		lis 	%r3, _start@h
 	#endif
+	rldimi	%r3, %r6, 63, 0
 	mtlr %r3
 	blr
