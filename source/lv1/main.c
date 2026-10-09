@@ -28,12 +28,6 @@ extern char other_threads_startup[], other_threads_startup_end[];
 volatile unsigned long secondary_hold_addr = 1;
 volatile int processors_online[6] = {1};
 
-#ifdef HACK_JTAG
-volatile long wakeup_cpus = 0;
-#else
-volatile long wakeup_cpus = 1;
-#endif
-
 void jump(unsigned long dtc, unsigned long kernel_base, unsigned long null, unsigned long reladdr, unsigned long hrmor);
 
 static inline uint64_t ld(volatile void *addr)
