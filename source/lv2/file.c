@@ -106,7 +106,7 @@ int launch_file(void *addr, unsigned len, int filetype, char *filename) {
   return ret;
 }
 
-int try_load_file(char *filename, int filetype) {
+int try_load_file(char *filename, int filetype, char* parameters, int numParams) {
   int ret;
   if (filetype == TYPE_NANDIMAGE) {
     try_rawflash(filename);
@@ -146,12 +146,43 @@ int try_load_file(char *filename, int filetype) {
   }
 
   if (filetype == TYPE_ELF) {
-    char *argv[] = {
-        filename,
-    };
-    int argc = sizeof(argv) / sizeof(char *);
+    if(!parameters || !numParams){
 
-    elf_setArgcArgv(argc, argv);
+        char *argv[] = {
+            filename,
+        };
+        int argc = sizeof(argv) / sizeof(char *);
+
+        elf_setArgcArgv(argc, argv);
+    } else{
+        //Try to find a way to *not* use malloc
+        char paramline[strlen(parameters)+1]; //the +1 is to include the null terminator.
+        memcpy(paramline,parameters,strlen(parameters)+1);     
+        char *argv[numParams+1] = {};
+        argv[0] = filename;
+        
+        char * ptr = strchr(paramline, ' '); //The pointer to the part of the string we're at. Whoever came up with this idea to use in kbootconf is a genius.
+        *ptr = '\0'; //make it a null terminator.
+
+        argv[1] = paramline; //looking at argv as a string will only ever bring up everything to the null terminator. Nothing more.
+        ptr++;
+        int i = 2;
+        while(true){
+            char* nextSpace = strchr(ptr, ' ');
+            if(!nextSpace){
+                argv[i] = ptr;
+                
+                break;
+            }
+            *nextSpace = '\0';
+            argv[i] = ptr;
+            ptr = nextSpace+1;
+            i++;
+        }
+        elf_setArgcArgv(i+1, argv);
+    
+    }
+    
   }
 
   ret = launch_file(buf, r, filetype, filename);
@@ -180,7 +211,7 @@ void fileloop() {
           printf("MMC Console Detected! Skipping %s...\r", filepath);
           j++;
         } else {
-          try_load_file(filepath, filelist[j].filetype);
+          try_load_file(filepath, filelist[j].filetype, NULL, 0);
           j++;
         }
       } while (filelist[j].filename != NULL);

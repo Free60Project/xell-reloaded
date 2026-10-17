@@ -20,6 +20,7 @@ struct kbootkernel {
 	char *root;
         char *video;
 	char *parameters;
+    int numParams;
 };
 
 struct kbootconf {

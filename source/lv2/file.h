@@ -20,6 +20,6 @@ struct filenames {
 int inflate_read(char *source,int len,char **dest,int * destsize, int gzip);
 void wait_and_cleanup_line();
 int launch_file(void * addr, unsigned len, int filetype, char *filename);
-int try_load_file(char *filename, int filetype);
+int try_load_file(char *filename, int filetype, char* parameters, int numParams);
 void fileloop();
 void tftp_loop(ip_addr_t server);
