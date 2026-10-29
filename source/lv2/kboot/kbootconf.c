@@ -24,11 +24,16 @@ see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #include <usb/usbmain.h>
 #include <console/console.h>
 #include <xenon_soc/xenon_power.h>
+#include <xenos/xe.h>
+#include <xenos/xe_internal.h>
+#include <xenos/edram.h>
 
 #include "tftp/tftp.h"
 #include "kbootconf.h"
 #include "file.h"
 #include "config.h"
+
+int kboot_edram_done=0;
 
 int boot_entry;
 char conf_buf[MAX_KBOOTCONF_SIZE];
@@ -280,8 +285,12 @@ int kbootconf_parse(void)
 				char *arg, *val;
 				split(p, &arg, &val, '=');
 				if (!val) {
-					strlcat(tmpbuf, arg, sizeof(tmpbuf));
-					strlcat(tmpbuf, " ", sizeof(tmpbuf));
+					if (!strcmp(arg, "edram")) {
+						conf.kernels[conf.num_kernels].edram = 1;
+					} else {
+						strlcat(tmpbuf, arg, sizeof(tmpbuf));
+						strlcat(tmpbuf, " ", sizeof(tmpbuf));
+					}
 				} else if (!strcmp(arg, "root")) {
 					root = val;
 				} else if (!strcmp(arg, "initrd")) {
@@ -536,6 +545,16 @@ int try_kbootconf(void * addr, unsigned len, char *kbootpath){
 		else
 			printf("OK!\n");
     }
+
+	if (conf.kernels[boot_entry].edram == 1 && kboot_edram_done == 0){ // train edram by initialising the GPU
+		struct XenosDevice _xe, *xe;
+		xe = &_xe;
+		printf("Initializing EDRAM ... \n");
+		Xe_Init(xe);
+		edram_init(xe);
+		Xe_pDebugSync(xe);
+		kboot_edram_done = 1; // dont keep doing it
+	}
 
     printf("Loading kernel ...\n");
     ret = kboot_loadfile(conf.kernels[boot_entry].kernel,TYPE_ELF, kbootpath);
