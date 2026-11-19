@@ -13,6 +13,7 @@
 #include <sys/iosupport.h>
 #include <ppc/register.h>
 #include <xenon_nand/xenon_sfcx.h>
+#include <xenon_nand/xenon_emmc.h>
 #include <xenon_nand/xenon_config.h>
 #include <xenon_soc/xenon_secotp.h>
 #include <xenon_soc/xenon_power.h>
@@ -131,7 +132,7 @@ int main(){
 	xenon_sound_init();
 
 	xenon_make_it_faster(XENON_SPEED_FULL);
-	if (xenon_get_console_type() != REV_CORONA_PHISON) //Not needed for MMC type of consoles! ;)
+	if (!xenon_is_emmc_console())
 	{
 		printf(" * nand init\n");
 		sfcx_init();
@@ -178,7 +179,7 @@ int main(){
 	consoleType = xenon_get_console_type();
 
 	printf("\n * Console Type: %s (PVR %08x)\n\n",
-			 (consoleType >= 0 && consoleType <= 7) ? consoleNames[consoleType] : "Unknown",
+			 (consoleType >= 0 && consoleType <= 8) ? consoleNames[consoleType] : "Unknown",
 			 mfspr(287));
 
 #ifndef NO_PRINT_CONFIG
